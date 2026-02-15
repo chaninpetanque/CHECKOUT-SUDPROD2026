@@ -1,0 +1,12 @@
+{
+  "name": "checkout-sudprod2026",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "csv-parser": "^3.2.0",
+    "formidable": "^3.5.2",
+    "pdfkit": "^0.17.2",
+    "xlsx": "^0.18.5"
+  }
+}
