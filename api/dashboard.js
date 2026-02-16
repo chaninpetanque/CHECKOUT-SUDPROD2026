@@ -4,8 +4,10 @@ import { mockService } from '../lib/mock-service.js';
 const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 const getQueryDate = (req) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  return url.searchParams.get('date') || getTodayDate();
+  const host = req.headers.host || 'localhost';
+  const url = new URL(req.url, `http://${host}`);
+  const dateParam = url.searchParams.get('date');
+  return dateParam || new Date().toISOString().split('T')[0];
 };
 
 export default async function handler(req, res) {
@@ -16,11 +18,14 @@ export default async function handler(req, res) {
 
   const date = getQueryDate(req);
 
+  // --- Mock Service Fallback ---
   if (!isSupabaseReady) {
-    res.json(mockService.dashboard(date));
+    const result = mockService.dashboard(date);
+    res.json(result);
     return;
   }
 
+  // --- Supabase Logic ---
   const { data, error } = await supabase
     .from('parcels')
     .select('status', { count: 'exact' })

@@ -28,12 +28,16 @@ export default async function handler(req, res) {
     return;
   }
 
+  // --- Mock Service Fallback ---
+  // If Supabase is not configured (no ENV vars), use in-memory mock service.
   if (!isSupabaseReady) {
     const result = mockService.scan(awb, today);
     res.json(result);
     return;
   }
 
+  // --- Supabase Logic ---
+  // 1. Check if parcel exists in manifest (uploaded)
   const { data: row, error } = await supabase
     .from('parcels')
     .select('id, awb, status')

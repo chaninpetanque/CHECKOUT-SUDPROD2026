@@ -1,12 +1,24 @@
 {
   "name": "checkout-sudprod2026",
+  "version": "1.0.0",
+  "description": "Production-grade barcode scanning and parcel management system for Sudprodshop.",
   "private": true,
   "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run start --prefix backend\" \"npm run dev --prefix frontend\"",
+    "start": "node backend/server.js",
+    "test:backend": "npm test --prefix backend",
+    "test:e2e": "npm run test:e2e --prefix frontend",
+    "build": "npm run build --prefix frontend"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
     "csv-parser": "^3.2.0",
     "formidable": "^3.5.2",
     "pdfkit": "^0.17.2",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

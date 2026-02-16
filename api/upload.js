@@ -72,17 +72,20 @@ export default async function handler(req, res) {
 
     const awbList = rows.map(extractAwb).filter(Boolean);
     if (!awbList.length) {
-      res.json({ message: 'File processed', inserted: 0, errors: rows.length });
-      return;
-    }
+    res.json({ message: 'File processed', inserted: 0, errors: rows.length });
+    return;
+  }
 
-    if (!isSupabaseReady) {
-      const result = mockService.uploadRows(awbList, today);
-      res.json({ message: 'File processed', inserted: result.inserted, errors: result.errors });
-      return;
-    }
+  // --- Mock Service Fallback ---
+  if (!isSupabaseReady) {
+    const result = mockService.uploadRows(awbList, today);
+    res.json({ message: 'File processed', inserted: result.inserted, errors: result.errors });
+    return;
+  }
 
-    const uniqueAwbs = Array.from(new Set(awbList));
+  // --- Supabase Logic ---
+  // 1. Identify duplicates in existing DB
+  const uniqueAwbs = Array.from(new Set(awbList));
     let existingCount = 0;
 
     for (const batch of chunk(uniqueAwbs, 400)) {

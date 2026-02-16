@@ -1,83 +1,99 @@
-# CHECKOUT SUDPROD 2026
+# Sudprodshop Checkout System
 
-A web application for scanning and verifying parcel statuses with barcode support, export, and Supabase-ready APIs.
+A production-grade barcode scanning and parcel management system built with the MERN-inspired stack (Node.js, Express, React, Supabase/Mock).
 
-## Features
-- **Upload**: Supports .xlsx and .csv files with AWB column detection.
-- **Dashboard**: Real-time stats (Total, Scanned, Missing, Surplus).
-- **Barcode Scanner**: USB/Bluetooth keyboard-style input and mobile camera scan.
-- **Audio Feedback**: Distinct sounds for Match, Duplicate, and Not Found.
-- **History**: Searchable scan history.
-- **Export**: CSV, Excel, and PDF reports.
-- **Auto Export**: Auto-download when all parcels are checked.
-- **Supabase Ready**: Serverless APIs for Vercel with mock fallback.
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Status](https://img.shields.io/badge/status-stable-green.svg)
 
-## Prerequisites
-- Node.js installed
-- Supabase project (for production)
+## 🚀 Features
 
-## Installation (Local)
-1. Open a terminal in the project root.
-2. Install dependencies:
+- **Real-time Barcode Scanning**: Supports camera-based scanning (QR/Barcode) and manual entry.
+- **Smart Validation**: instant feedback for Matches, Duplicates, and Surplus items.
+- **Offline/Demo Mode**: Automatically switches to a Mock Service when the backend/database is unavailable.
+- **Dashboard Analytics**: Visualizes scanning progress and daily statistics.
+- **Mobile-First Design**: Optimized for warehouse handheld devices and mobile phones.
+- **Modern UI/UX**: Built with Tailwind CSS, Shadcn/UI, and Framer Motion for smooth interactions.
+
+## 🛠 Tech Stack
+
+- **Frontend**: React 19, Vite, Tailwind CSS 4, React Query, Zustand.
+- **Backend**: Node.js, Express.
+- **Database**: Supabase (PostgreSQL) with local Mock Fallback.
+- **Testing**: Playwright (E2E), Jest (Unit - Backend).
+
+## 📦 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/checkout-sudprod2026.git
+   cd checkout-sudprod2026
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   # Install root dependencies
+   npm install
+
+   # Install frontend dependencies
+   cd frontend
+   npm install
+
+   # Install backend dependencies
+   cd ../backend
+   npm install
+   ```
+
+3. **Configuration (Optional)**
+   Create a `.env` file in the root directory if you want to connect to a real Supabase instance.
+   ```env
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_KEY=your_supabase_anon_key
+   PORT=3000
+   ```
+   *Note: If no `.env` is provided, the system defaults to **Demo Mode** using mock data.*
+
+## 🏃 Usage
+
+### Development Mode
+Run both frontend and backend concurrently:
 ```bash
-npm install
-cd backend
-npm install
-cd ../frontend
-npm install
-```
-
-## Running the Application (Local)
-### Terminal 1: Backend
-```bash
-cd backend
-npm start
-```
-Server runs on port 3000.
-
-### Terminal 2: Frontend
-```bash
-cd frontend
 npm run dev
 ```
-Frontend runs on port 5173.
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- Backend API: [http://localhost:3000](http://localhost:3000)
 
-## How to Use
-1. Open the web app in your browser.
-2. Upload your shipment file (Excel/CSV).
-3. Use the barcode scanner:
-   - USB/Bluetooth scanners work as keyboard input in the dashboard.
-   - Mobile camera scanner is available at `/scan`.
-4. Export results via CSV/Excel/PDF.
+### Production Build
+1. Build the frontend:
+   ```bash
+   npm run build
+   ```
+2. Start the server (serves API):
+   ```bash
+   npm start
+   ```
 
-## File Format
-- Excel (.xlsx) or CSV (.csv)
-- Must contain a header row
-- One column must be named **AWB** (case-insensitive)
+## 🧪 Testing
 
-## Supabase Setup (Production)
-Create table and indexes:
-```sql
-create table if not exists parcels (
-  id bigserial primary key,
-  awb text not null,
-  status text not null,
-  date text not null,
-  created_at timestamptz default now(),
-  updated_at timestamptz default now(),
-  unique (awb, date)
-);
+- **Backend Tests**: `npm run test:backend`
+- **E2E Tests**: `npm run test:e2e`
 
-create index if not exists idx_parcels_date on parcels (date);
-create index if not exists idx_parcels_awb_date on parcels (awb, date);
+## 📂 Project Structure
+
+```
+├── api/                # Shared API Logic (Backend handlers)
+├── backend/            # Express Server & Tests
+├── frontend/           # React Application (Vite)
+├── lib/                # Shared Libraries (Supabase client, Mock Service)
+├── scripts/            # Utility Scripts
+└── package.json        # Root configuration
 ```
 
-## Environment Variables (Vercel)
-- SUPABASE_URL
-- SUPABASE_SERVICE_ROLE_KEY
+## 🔒 Security
 
-## Deploy to Vercel
-1. Push this repo to GitHub.
-2. Import the project in Vercel.
-3. Set environment variables.
-4. Deploy.
+- All sensitive keys are managed via environment variables.
+- API endpoints have basic error handling and validation.
+- **Demo Mode** is safe for public preview as it resets on reload.
+
+---
+
+© 2026 Sudprodshop. All rights reserved.
