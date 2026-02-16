@@ -2,6 +2,10 @@
   "name": "checkout-sudprod2026",
   "version": "1.0.0",
   "description": "Production-grade barcode scanning and parcel management system for Sudprodshop.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaninpetanque/CHECKOUT-SUDPROD2026.git"
+  },
   "private": true,
   "type": "module",
   "scripts": {

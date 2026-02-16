@@ -25,8 +25,8 @@ A production-grade barcode scanning and parcel management system built with the 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/checkout-sudprod2026.git
-   cd checkout-sudprod2026
+   git clone https://github.com/chaninpetanque/CHECKOUT-SUDPROD2026.git
+   cd CHECKOUT-SUDPROD2026
    ```
 
 2. **Install Dependencies**
