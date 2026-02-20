@@ -5,8 +5,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env server.js",
-    "test": "node --env-file=.env --test"
+    "start": "node --env-file=../.env server.js || node server.js",
+    "test": "node --env-file=../.env --test || node --test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",

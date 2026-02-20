@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Package, CheckCircle, AlertTriangle, XCircle, QrCode, ExternalLink, Download, FileText } from 'lucide-react';
+import { Package, CheckCircle, AlertTriangle, XCircle, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon } from 'lucide-react';
+import QRCode from 'react-qr-code';
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale';
 
 import StatCard from './dashboard/StatCard';
 import UploadSection from './dashboard/UploadSection';
@@ -10,6 +13,8 @@ import HistoryTable from './dashboard/HistoryTable';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
 import { Skeleton } from './ui/skeleton';
+import { Calendar } from './ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '../lib/utils';
 import { 
   fetchDashboardStats, 
@@ -59,13 +64,13 @@ const Dashboard = () => {
   const uploadMutation = useMutation({
     mutationFn: (formData) => uploadFile(formData),
     onSuccess: () => {
-      toast.success('File uploaded successfully!');
+      toast.success('อัปโหลดไฟล์สำเร็จ!');
       setFile(null);
       queryClient.invalidateQueries(['dashboard']);
       queryClient.invalidateQueries(['history']);
     },
     onError: () => {
-      toast.error('Upload failed. Please check the file format.');
+      toast.error('อัปโหลดล้มเหลว กรุณาตรวจสอบรูปแบบไฟล์');
     }
   });
 
@@ -89,12 +94,12 @@ const Dashboard = () => {
         awb: data.awb,
         time: new Date().toLocaleTimeString('th-TH')
       });
-      if (data.status === 'match') toast.success(`Matched: ${data.awb}`);
-      else if (data.status === 'duplicate') toast.warning(`Duplicate: ${data.awb}`);
-      else if (data.status === 'surplus') toast.error(`Surplus: ${data.awb}`);
+      if (data.status === 'match') toast.success(`จับคู่สำเร็จ: ${data.awb}`);
+      else if (data.status === 'duplicate') toast.warning(`ซ้ำ: ${data.awb}`);
+      else if (data.status === 'surplus') toast.error(`เกินจำนวน: ${data.awb}`);
     },
     onError: () => {
-      const errorMsg = 'Network Error';
+      const errorMsg = 'ข้อผิดพลาดเครือข่าย';
       setScanStatus({
         status: 'error',
         message: errorMsg,
@@ -113,7 +118,7 @@ const Dashboard = () => {
   };
 
   const handleClear = () => {
-    if (window.confirm('Are you sure you want to clear OLD pending records?')) {
+    if (window.confirm('คุณแน่ใจหรือไม่ที่จะล้างข้อมูลเก่า?')) {
       clearMutation.mutate();
     }
   };
@@ -135,10 +140,10 @@ const Dashboard = () => {
       URL.revokeObjectURL(url);
       
       if (isAuto) {
-        toast.info('Auto-exported completed report');
+        toast.info('ส่งออกรายงานอัตโนมัติเรียบร้อยแล้ว');
         setScanStatus({
           status: 'export',
-          message: 'Auto-exported report',
+          message: 'ส่งออกรายงานอัตโนมัติ',
           awb: '',
           time: new Date().toLocaleTimeString('th-TH')
         });
@@ -161,6 +166,22 @@ const Dashboard = () => {
     setScannerInput('');
   };
 
+  const getScanUrl = () => {
+    if (typeof window === 'undefined') return '';
+    
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    if (isLocalhost && ipData?.ip && ipData.ip !== 'localhost') {
+      const protocol = window.location.protocol;
+      const port = window.location.port;
+      return `${protocol}//${ipData.ip}${port ? `:${port}` : ''}/scan`;
+    }
+    
+    return `${window.location.origin}/scan`;
+  };
+
+  const scanUrl = getScanUrl();
+
   useEffect(() => {
     if (!autoExportEnabled || !stats) return;
     if (stats.total_expected > 0 && stats.missing === 0) {
@@ -173,6 +194,41 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      
+      {/* Date Picker Header */}
+      <div className="flex flex-col items-center justify-center space-y-2 mb-6">
+        <h2 className="text-lg font-semibold text-gray-700">สรุปผลประจำวัน</h2>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-[240px] justify-start text-left font-normal border-blue-200 hover:bg-blue-50 hover:text-blue-600",
+                !selectedDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4 text-blue-500" />
+              {selectedDate ? format(new Date(selectedDate + 'T00:00:00'), "PPP", { locale: th }) : <span>เลือกวันที่</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="center">
+            <Calendar
+              mode="single"
+              selected={selectedDate ? new Date(selectedDate + 'T00:00:00') : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  // Adjust for timezone offset to prevent day shift
+                  const offsetDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+                  setSelectedDate(offsetDate.toISOString().split('T')[0]);
+                }
+              }}
+              initialFocus
+              locale={th}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statsLoading ? (
@@ -182,28 +238,28 @@ const Dashboard = () => {
         ) : (
           <>
             <StatCard 
-              title="Total Expected" 
+              title="ทั้งหมดที่คาดหวัง" 
               value={stats?.total_expected || 0} 
               icon={Package} 
               className="border-blue-100 bg-blue-50/50"
               valueClassName="text-blue-700"
             />
             <StatCard 
-              title="Scanned" 
+              title="สแกนแล้ว" 
               value={stats?.scanned || 0} 
               icon={CheckCircle} 
               className="border-green-100 bg-green-50/50"
               valueClassName="text-green-700"
             />
             <StatCard 
-              title="Missing" 
+              title="ตกหล่น" 
               value={stats?.missing || 0} 
               icon={XCircle} 
               className="border-gray-100 bg-gray-50/50"
               valueClassName="text-gray-700"
             />
             <StatCard 
-              title="Surplus" 
+              title="เกินจำนวน" 
               value={stats?.surplus || 0} 
               icon={AlertTriangle} 
               className="border-red-100 bg-red-50/50"
@@ -261,27 +317,29 @@ const Dashboard = () => {
            <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-800">
-                <QrCode className="h-5 w-5" /> Mobile Scanner
+                <QrCode className="h-5 w-5" /> สแกนเนอร์มือถือ
               </CardTitle>
               <CardDescription className="text-yellow-700/80">
-                Use your phone as a scanner
+                ใช้มือถือของคุณเป็นเครื่องสแกน
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-sm border border-yellow-100 flex justify-center">
-                 {/* Placeholder for QR Code */}
-                 <div className="h-32 w-32 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-400">
-                    QR Code Here
-                 </div>
+                 <QRCode
+                    value={scanUrl}
+                    size={128}
+                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                    viewBox={`0 0 256 256`}
+                 />
               </div>
               <div className="text-center">
                 <p className="text-sm font-mono bg-white/50 p-2 rounded border border-yellow-100 text-yellow-800 break-all">
-                  {`${ipData?.origin || (typeof window !== 'undefined' ? window.location.origin : '')}/scan`}
+                  {scanUrl}
                 </p>
               </div>
               <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white" asChild>
                 <a href="/scan" target="_blank" rel="noreferrer">
-                  Open Scanner UI <ExternalLink className="ml-2 h-4 w-4" />
+                  เปิดหน้าสแกน <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </CardContent>
@@ -291,7 +349,7 @@ const Dashboard = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Download className="h-5 w-5" /> Export Reports
+                <Download className="h-5 w-5" /> ส่งออกรายงาน
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -314,18 +372,18 @@ const Dashboard = () => {
               
               <div className="space-y-2">
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('all')}>
-                  <FileText className="mr-2 h-4 w-4" /> Export All Data
+                  <FileText className="mr-2 h-4 w-4" /> ส่งออกข้อมูลทั้งหมด
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('missing')}>
-                  <AlertTriangle className="mr-2 h-4 w-4" /> Export Missing Only
+                  <AlertTriangle className="mr-2 h-4 w-4" /> ส่งออกรายการตกหล่น
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('surplus')}>
-                  <XCircle className="mr-2 h-4 w-4" /> Export Surplus Only
+                  <XCircle className="mr-2 h-4 w-4" /> ส่งออกรายการเกิน
                 </Button>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t">
-                <span className="text-sm font-medium text-gray-700">Auto-export on complete</span>
+                <span className="text-sm font-medium text-gray-700">ส่งออกอัตโนมัติเมื่อครบ</span>
                 <div 
                   className={cn("w-10 h-6 rounded-full p-1 cursor-pointer transition-colors", autoExportEnabled ? "bg-green-500" : "bg-gray-300")}
                   onClick={() => setAutoExportEnabled(!autoExportEnabled)}

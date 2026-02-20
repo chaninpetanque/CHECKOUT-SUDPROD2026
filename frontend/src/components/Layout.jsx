@@ -9,8 +9,8 @@ const Layout = ({ children }) => {
   const location = useLocation();
 
   const navItems = [
-    { label: 'Dashboard', path: '/', icon: Package },
-    { label: 'Scanner', path: '/scan', icon: Barcode },
+    { label: 'แดชบอร์ด', path: '/', icon: Package },
+    { label: 'สแกนเนอร์', path: '/scan', icon: Barcode },
   ];
 
   return (
@@ -26,7 +26,7 @@ const Layout = ({ children }) => {
                     <Package className="h-6 w-6 text-white" />
                   </div>
                   <span className="text-xl font-bold tracking-tight text-gray-900">
-                    Inventory<span className="text-blue-600">Check</span>
+                    ระบบ<span className="text-blue-600">เช็คพัสดุ</span>
                   </span>
                 </Link>
               </div>
@@ -102,7 +102,7 @@ const Layout = ({ children }) => {
       <footer className="bg-white border-t border-gray-200 mt-auto">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-gray-500">
-            &copy; {new Date().getFullYear()} Sudprodshop Inventory System. All rights reserved.
+            &copy; {new Date().getFullYear()} ระบบจัดการพัสดุ Sudprodshop สงวนลิขสิทธิ์
           </p>
         </div>
       </footer>

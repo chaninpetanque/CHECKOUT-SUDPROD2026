@@ -39,16 +39,16 @@ const ScanSection = ({
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center gap-2">
             <Scan className={cn("h-5 w-5 transition-colors", barcodeModeEnabled ? "text-green-600" : "text-gray-400")} />
-            Barcode Scanner
+            เครื่องสแกนบาร์โค้ด
           </CardTitle>
           <Badge variant={barcodeModeEnabled ? (scannerFocused ? "success" : "warning") : "secondary"}>
             {barcodeModeEnabled 
-              ? (scannerFocused ? "Ready to Scan" : "Click to Focus") 
-              : "Mode: Manual"}
+              ? (scannerFocused ? "พร้อมสแกน" : "คลิกเพื่อเริ่ม") 
+              : "โหมด: กรอกเอง"}
           </Badge>
         </div>
         <CardDescription>
-          Connect a USB/Bluetooth scanner or type manually.
+          เชื่อมต่อเครื่องสแกน USB/Bluetooth หรือพิมพ์รหัสด้วยตนเอง
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -58,7 +58,7 @@ const ScanSection = ({
             onClick={() => setBarcodeModeEnabled(!barcodeModeEnabled)}
             className={cn("w-full md:w-auto transition-all", barcodeModeEnabled ? "bg-green-600 hover:bg-green-700" : "")}
           >
-            {barcodeModeEnabled ? "Scanner ON" : "Enable Scanner"}
+            {barcodeModeEnabled ? "เปิดใช้งานสแกนเนอร์" : "เปิดสแกนเนอร์"}
           </Button>
         </div>
 
@@ -71,7 +71,7 @@ const ScanSection = ({
             onBlur={() => setScannerFocused(false)}
             onKeyDown={handleKeyDown}
             disabled={!barcodeModeEnabled}
-            placeholder={barcodeModeEnabled ? "Scan barcode here..." : "Enable scanner mode first"}
+            placeholder={barcodeModeEnabled ? "สแกนบาร์โค้ดที่นี่..." : "เปิดโหมดสแกนเนอร์ก่อน"}
             className={cn(
               "pl-10 h-12 text-lg font-mono transition-all",
               barcodeModeEnabled ? "border-green-300 focus:ring-green-500" : "bg-gray-50"
@@ -102,10 +102,10 @@ const ScanSection = ({
           >
             <div>
               <div className="font-bold flex items-center gap-2">
-                {scanStatus.status === 'match' && "✅ Matched"}
-                {scanStatus.status === 'duplicate' && "⚠️ Duplicate"}
-                {scanStatus.status === 'surplus' && "❌ Surplus (Unknown)"}
-                {scanStatus.status === 'export' && "⬇️ Exported"}
+                {scanStatus.status === 'match' && "✅ จับคู่สำเร็จ"}
+                {scanStatus.status === 'duplicate' && "⚠️ ซ้ำ"}
+                {scanStatus.status === 'surplus' && "❌ เกินจำนวน (ไม่พบข้อมูล)"}
+                {scanStatus.status === 'export' && "⬇️ ส่งออกแล้ว"}
               </div>
               <div className="text-sm mt-1">{scanStatus.message}</div>
               {scanStatus.awb && <div className="font-mono text-xs mt-1 opacity-75">{scanStatus.awb}</div>}

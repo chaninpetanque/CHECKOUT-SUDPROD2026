@@ -18,14 +18,14 @@ export const mockIpData = {
 };
 
 export const mockUploadResponse = {
-  message: 'Mock file uploaded successfully (Demo Mode)',
+  message: 'อัปโหลดไฟล์จำลองสำเร็จ (โหมดสาธิต)',
   count: 150
 };
 
 export const mockScanResponse = (awb) => {
   // Simulate random outcomes for demo
   const rand = Math.random();
-  if (rand > 0.8) return { status: 'surplus', message: 'Not in manifest (Mock)', awb };
-  if (rand > 0.6) return { status: 'duplicate', message: 'Already scanned (Mock)', awb };
-  return { status: 'match', message: 'Matched successfully (Mock)', awb };
+  if (rand > 0.8) return { status: 'surplus', message: 'ไม่อยู่ในรายการ (จำลอง)', awb };
+  if (rand > 0.6) return { status: 'duplicate', message: 'สแกนซ้ำ (จำลอง)', awb };
+  return { status: 'match', message: 'จับคู่สำเร็จ (จำลอง)', awb };
 };

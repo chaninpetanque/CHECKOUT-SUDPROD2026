@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   const today = getTodayDate();
 
   if (!awb) {
-    res.status(400).json({ error: 'AWB is required' });
+    res.status(400).json({ error: 'กรุณาระบุเลขพัสดุ' });
     return;
   }
 
@@ -60,18 +60,18 @@ export default async function handler(req, res) {
         res.status(500).json({ error: updateError.message });
         return;
       }
-      res.json({ status: 'match', message: '✅ Match Found', awb });
+      res.json({ status: 'match', message: '✅ จับคู่สำเร็จ', awb });
       return;
     }
     if (row.status === 'scanned') {
-      res.json({ status: 'duplicate', message: '⚠️ Duplicate Scan', awb });
+      res.json({ status: 'duplicate', message: '⚠️ สแกนซ้ำ', awb });
       return;
     }
     if (row.status === 'surplus') {
-      res.json({ status: 'duplicate', message: '⚠️ Duplicate Scan (Surplus)', awb });
+      res.json({ status: 'duplicate', message: '⚠️ สแกนซ้ำ (เกินจำนวน)', awb });
       return;
     }
-    res.json({ status: 'unknown', message: 'Unknown status', awb });
+    res.json({ status: 'unknown', message: 'สถานะไม่ทราบค่า', awb });
     return;
   }
 
@@ -82,5 +82,5 @@ export default async function handler(req, res) {
     res.status(500).json({ error: insertError.message });
     return;
   }
-  res.json({ status: 'surplus', message: '❌ Not in List (Surplus)', awb });
+  res.json({ status: 'surplus', message: '❌ ไม่อยู่ในรายการ (เกินจำนวน)', awb });
 }

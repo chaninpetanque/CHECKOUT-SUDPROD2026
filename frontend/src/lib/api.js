@@ -37,7 +37,7 @@ const handleRequest = async (requestFn, mockDataFn) => {
     // If we were in fallback mode and succeeded, notify user
     if (isFallbackMode) {
       isFallbackMode = false;
-      toast.success('Connection restored: Live data active');
+      toast.success('เชื่อมต่อสำเร็จ: ข้อมูลจริงพร้อมใช้งาน');
     }
     
     return response.data;
@@ -47,7 +47,7 @@ const handleRequest = async (requestFn, mockDataFn) => {
       if (!isFallbackMode) {
         isFallbackMode = true;
         console.warn('API unavailable, switching to Mock Data');
-        toast.warning('Backend unavailable: Using Demo Data');
+        toast.warning('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ใช้ข้อมูลจำลอง');
       }
       
       // Simulate network delay for realistic feel

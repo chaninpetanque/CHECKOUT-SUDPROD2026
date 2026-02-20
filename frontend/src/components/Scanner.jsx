@@ -28,7 +28,7 @@ const Scanner = () => {
         audioCtxRef.current.resume();
     }
     setAudioEnabled(true);
-    toast.success("Audio enabled");
+    toast.success("เปิดเสียงแล้ว");
   };
 
   const playSound = useCallback((type) => {
@@ -81,17 +81,17 @@ const Scanner = () => {
         status: data.status, 
         message: data.message, 
         awb: data.awb,
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: new Date().toLocaleTimeString('th-TH')
       });
       playSound(data.status);
       
-      if (data.status === 'match') toast.success(`Matched: ${data.awb}`);
-      else if (data.status === 'duplicate') toast.warning(`Duplicate: ${data.awb}`);
-      else if (data.status === 'surplus') toast.error(`Surplus: ${data.awb}`);
+      if (data.status === 'match') toast.success(`จับคู่สำเร็จ: ${data.awb}`);
+      else if (data.status === 'duplicate') toast.warning(`ซ้ำ: ${data.awb}`);
+      else if (data.status === 'surplus') toast.error(`เกินจำนวน: ${data.awb}`);
     },
     onError: (err) => {
       console.error("Scan error:", err);
-      toast.error(err.message || 'Scan failed');
+      toast.error(err.message || 'การสแกนล้มเหลว');
     },
     onSettled: () => {
       // Clear last scanned ref after a delay to allow rescanning
@@ -182,7 +182,7 @@ const Scanner = () => {
       <div className="flex justify-between items-center mb-6 text-white">
         <Link to="/" className="flex items-center gap-2 text-white/90 hover:text-white transition-colors">
           <ArrowLeft className="h-6 w-6" />
-          <span className="font-medium">Dashboard</span>
+          <span className="font-medium">แดชบอร์ด</span>
         </Link>
         <div className="flex gap-2">
           <Button
@@ -214,14 +214,14 @@ const Scanner = () => {
               <div className="p-8 space-y-4 bg-white min-h-[300px] flex flex-col justify-center">
                 <div className="text-center mb-4">
                   <Keyboard className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                  <h3 className="text-lg font-medium text-gray-900">Manual Entry</h3>
-                  <p className="text-sm text-gray-500">Enter AWB number manually</p>
+                  <h3 className="text-lg font-medium text-gray-900">กรอกข้อมูลเอง</h3>
+                  <p className="text-sm text-gray-500">กรอกเลขพัสดุด้วยตนเอง</p>
                 </div>
                 <form onSubmit={handleManualSubmit} className="space-y-4">
                     <Input 
                         value={manualInput}
                         onChange={(e) => setManualInput(e.target.value)}
-                        placeholder="Scan or type AWB..."
+                        placeholder="สแกนหรือพิมพ์เลขพัสดุ..."
                         className="text-center text-lg h-12"
                         autoFocus
                     />
@@ -233,10 +233,10 @@ const Scanner = () => {
                         {scanMutation.isPending ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Processing...
+                                กำลังประมวลผล...
                             </>
                         ) : (
-                            "Submit"
+                            "ตกลง"
                         )}
                     </Button>
                 </form>
@@ -250,7 +250,7 @@ const Scanner = () => {
                             {scanMutation.isPending && (
                                 <div className="bg-white/90 text-black px-4 py-2 rounded-full flex items-center shadow-lg">
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Processing...
+                                    กำลังประมวลผล...
                                 </div>
                             )}
                         </div>
@@ -304,7 +304,7 @@ const Scanner = () => {
       
       {/* Footer Instructions */}
       <div className="text-center text-white/60 text-sm mt-8">
-        <p>Point camera at barcode or use manual entry</p>
+        <p>ส่องกล้องไปที่บาร์โค้ดหรือกรอกข้อมูลเอง</p>
       </div>
     </div>
   );

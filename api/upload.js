@@ -49,7 +49,7 @@ export default async function handler(req, res) {
   const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
   if (!file) {
-    res.status(400).json({ error: 'No file uploaded' });
+    res.status(400).json({ error: 'ไม่ได้อัปโหลดไฟล์' });
     return;
   }
 
@@ -66,20 +66,20 @@ export default async function handler(req, res) {
     } else if (ext === '.csv') {
       rows = await parseCsv(filePath);
     } else {
-      res.status(400).json({ error: 'Invalid file format. Please upload .xlsx or .csv' });
+      res.status(400).json({ error: 'รูปแบบไฟล์ไม่ถูกต้อง กรุณาอัปโหลดไฟล์ .xlsx หรือ .csv' });
       return;
     }
 
     const awbList = rows.map(extractAwb).filter(Boolean);
     if (!awbList.length) {
-    res.json({ message: 'File processed', inserted: 0, errors: rows.length });
+    res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: 0, errors: rows.length });
     return;
   }
 
   // --- Mock Service Fallback ---
   if (!isSupabaseReady) {
     const result = mockService.uploadRows(awbList, today);
-    res.json({ message: 'File processed', inserted: result.inserted, errors: result.errors });
+    res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: result.inserted, errors: result.errors });
     return;
   }
 
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
 
     const errors = awbList.length - uniqueAwbs.length;
     const inserted = Math.max(uniqueAwbs.length - existingCount, 0);
-    res.json({ message: 'File processed', inserted, errors });
+    res.json({ message: 'ประมวลผลไฟล์เรียบร้อยแล้ว', inserted, errors });
   } finally {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
