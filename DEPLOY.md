@@ -1,4 +1,4 @@
-# 🚀 Deployment Guide: Sudprodshop Checkout
+# 🚀 Deployment Guide: Sudprodshop Checkout (Updated)
 
 ## ✅ Phase 1: GitHub Repository
 Code has been successfully pushed to:
@@ -6,7 +6,7 @@ Code has been successfully pushed to:
 
 ---
 
-## ⚡ Phase 2: Deploy to Vercel
+## ⚡ Phase 2: Deploy to Vercel (The "Standard" Way)
 
 Follow these steps to deploy your application to Vercel:
 
@@ -17,13 +17,15 @@ Follow these steps to deploy your application to Vercel:
     - Click **"Add New..."** -> **"Project"**.
     - Select **"Import"** next to the `CHECKOUT-SUDPROD2026` repository.
 
-3.  **Configure Project:**
-    Vercel should automatically detect the settings, but please verify:
+3.  **Configure Project (Crucial Step):**
+    Vercel should automatically detect the settings, but please **manually verify** these settings to avoid 404 errors:
     
     *   **Framework Preset:** `Vite`
     *   **Root Directory:** `.` (Leave as default / root)
-    *   **Build Command:** `npm run build` (This runs `npm run build --prefix frontend`)
-    *   **Output Directory:** `frontend/dist`
+    *   **Build Command:** `npm run build` 
+        *(This runs the root script which triggers the frontend build)*
+    *   **Output Directory:** `dist` 
+        *(IMPORTANT: Do NOT use `frontend/dist`. We have configured Vite to output to the root `dist` folder)*
     *   **Install Command:** `npm install` (Default)
 
 4.  **Environment Variables:**
