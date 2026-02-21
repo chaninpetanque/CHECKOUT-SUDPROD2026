@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Package, CheckCircle, AlertTriangle, XCircle, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon } from 'lucide-react';
+import { Package, CircleCheck, TriangleAlert, CircleX, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon } from 'lucide-react';
 import QRCode from 'react-qr-code';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
@@ -247,21 +247,21 @@ const Dashboard = () => {
             <StatCard 
               title="สแกนแล้ว" 
               value={stats?.scanned || 0} 
-              icon={CheckCircle} 
+              icon={CircleCheck} 
               className="border-green-100 bg-green-50/50"
               valueClassName="text-green-700"
             />
             <StatCard 
               title="ตกหล่น" 
               value={stats?.missing || 0} 
-              icon={XCircle} 
+              icon={CircleX} 
               className="border-gray-100 bg-gray-50/50"
               valueClassName="text-gray-700"
             />
             <StatCard 
               title="เกินจำนวน" 
               value={stats?.surplus || 0} 
-              icon={AlertTriangle} 
+              icon={TriangleAlert} 
               className="border-red-100 bg-red-50/50"
               valueClassName="text-red-700"
             />
@@ -375,10 +375,10 @@ const Dashboard = () => {
                   <FileText className="mr-2 h-4 w-4" /> ส่งออกข้อมูลทั้งหมด
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('missing')}>
-                  <AlertTriangle className="mr-2 h-4 w-4" /> ส่งออกรายการตกหล่น
+                  <TriangleAlert className="mr-2 h-4 w-4" /> ส่งออกรายการตกหล่น
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('surplus')}>
-                  <XCircle className="mr-2 h-4 w-4" /> ส่งออกรายการเกิน
+                  <CircleX className="mr-2 h-4 w-4" /> ส่งออกรายการเกิน
                 </Button>
               </div>
 

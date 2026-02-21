@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { Upload, Trash2, FileSpreadsheet } from 'lucide-react';
+import { Upload, Trash, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 
 const UploadSection = ({ file, setFile, onUpload, isUploading, onClear, isClearing }) => {
@@ -76,7 +76,7 @@ const UploadSection = ({ file, setFile, onUpload, isUploading, onClear, isCleari
                     >
                       {isClearing ? 'กำลังล้าง...' : (
                         <>
-                          <Trash2 className="mr-2 h-4 w-4" /> ล้างข้อมูลเก่า
+                          <Trash className="mr-2 h-4 w-4" /> ล้างข้อมูลเก่า
                         </>
                       )}
                     </Button>
