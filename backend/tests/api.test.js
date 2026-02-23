@@ -8,7 +8,7 @@ import app from '../server.js';
 
 const today = new Date().toISOString().split('T')[0];
 
-import { supabase } from '../lib/supabase.js';
+import { supabase } from '../../lib/supabase.js';
 
 test('upload, scan, and export flow (Mock Mode)', async () => {
   const uniqueId = Date.now();
@@ -24,11 +24,11 @@ test('upload, scan, and export flow (Mock Mode)', async () => {
     const uploadRes = await request(app)
       .post('/api/upload')
       .attach('file', csvPath);
-    
+
     assert.equal(uploadRes.status, 200);
     // Note: In mock mode, it might not return inserted count same way if logic differs, 
     // but based on api/upload.js it returns { message, inserted, errors }
-    
+
     // 2. Dashboard Check
     const statsRes1 = await request(app).get(`/api/dashboard?date=${today}`);
     assert.equal(statsRes1.status, 200);

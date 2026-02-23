@@ -1,4 +1,3 @@
-import os from 'os';
 
 export default function handler(req, res) {
   if (req.method !== 'GET') {
@@ -10,22 +9,11 @@ export default function handler(req, res) {
   const hostHeader = req.headers['x-forwarded-host'] || req.headers.host;
   const protocol = Array.isArray(protoHeader) ? protoHeader[0] : (protoHeader || 'http');
   const host = Array.isArray(hostHeader) ? hostHeader[0] : hostHeader;
-  
-  // Get LAN IP
-  const interfaces = os.networkInterfaces();
-  let lanIp = 'localhost';
-  
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        lanIp = iface.address;
-        break;
-      }
-    }
-    if (lanIp !== 'localhost') break;
-  }
+
+  // Use x-forwarded-for for client IP (works on Vercel and reverse proxies)
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
 
   const origin = host ? `${protocol}://${host}` : 'http://localhost:3000';
-  
-  res.json({ origin, ip: lanIp });
+
+  res.json({ origin, ip: clientIp });
 }
