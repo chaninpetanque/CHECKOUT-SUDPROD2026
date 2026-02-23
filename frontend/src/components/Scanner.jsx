@@ -15,6 +15,7 @@ const Scanner = () => {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [manualMode, setManualMode] = useState(false);
   const [manualInput, setManualInput] = useState('');
+  const [scannerReady, setScannerReady] = useState(false);
   
   const scannerRef = useRef(null);
   const audioCtxRef = useRef(null);
@@ -151,6 +152,7 @@ const Scanner = () => {
            // ignore scan errors to prevent console spam
         });
         scannerRef.current = scanner;
+        setScannerReady(true);
     }, 100);
 
     return () => {
@@ -161,6 +163,7 @@ const Scanner = () => {
         } catch (e) {
             console.error("Cleanup error:", e);
         }
+        setScannerReady(false);
       }
     };
   }, [manualMode, scanMutation]);
@@ -245,7 +248,7 @@ const Scanner = () => {
                 <div className="relative bg-black min-h-[300px]">
                     <div id="reader" className="w-full h-full"></div>
                     {/* Overlay for scanner loading or processing */}
-                    {(!scannerRef.current || scanMutation.isPending) && (
+                    {(!scannerReady || scanMutation.isPending) && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10 pointer-events-none">
                             {scanMutation.isPending && (
                                 <div className="bg-white/90 text-black px-4 py-2 rounded-full flex items-center shadow-lg">

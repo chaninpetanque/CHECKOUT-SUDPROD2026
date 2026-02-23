@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Search, Download, RefreshCw, FileText } from 'lucide-react';
+import { Search, Download, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 const HistoryTable = ({ 

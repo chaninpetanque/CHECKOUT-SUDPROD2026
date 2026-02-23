@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Package, CircleCheck, TriangleAlert, CircleX, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon } from 'lucide-react';
-import QRCode from 'react-qr-code';
+import { QRCode } from 'react-qr-code';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 

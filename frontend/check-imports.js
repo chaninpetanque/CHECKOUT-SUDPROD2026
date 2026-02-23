@@ -1,0 +1,34 @@
+import * as Lucide from 'lucide-react';
+import QRCode from 'react-qr-code';
+import { format } from 'date-fns';
+import { th } from 'date-fns/locale';
+
+console.log('--- Lucide ---');
+console.log('Barcode:', !!Lucide.Barcode);
+console.log('ScanBarcode:', !!Lucide.ScanBarcode);
+console.log('Package:', !!Lucide.Package);
+console.log('Menu:', !!Lucide.Menu);
+console.log('X:', !!Lucide.X);
+console.log('CircleCheck:', !!Lucide.CircleCheck);
+console.log('TriangleAlert:', !!Lucide.TriangleAlert);
+console.log('CircleX:', !!Lucide.CircleX);
+console.log('QrCode:', !!Lucide.QrCode);
+console.log('ExternalLink:', !!Lucide.ExternalLink);
+console.log('Download:', !!Lucide.Download);
+console.log('FileText:', !!Lucide.FileText);
+console.log('Calendar:', !!Lucide.Calendar);
+console.log('Trash:', !!Lucide.Trash);
+console.log('FileSpreadsheet:', !!Lucide.FileSpreadsheet);
+console.log('Search:', !!Lucide.Search);
+console.log('Scan:', !!Lucide.Scan);
+console.log('Loader2:', !!Lucide.Loader2);
+console.log('ArrowLeft:', !!Lucide.ArrowLeft);
+console.log('Volume2:', !!Lucide.Volume2);
+console.log('VolumeX:', !!Lucide.VolumeX);
+console.log('Keyboard:', !!Lucide.Keyboard);
+console.log('Camera:', !!Lucide.Camera);
+
+console.log('--- Other Libs ---');
+console.log('QRCode:', !!QRCode);
+console.log('format:', !!format);
+console.log('th locale:', !!th);
