@@ -33,13 +33,13 @@ const handleRequest = async (requestFn, mockDataFn) => {
   try {
     // Try the actual API request
     const response = await requestFn();
-    
+
     // If we were in fallback mode and succeeded, notify user
     if (isFallbackMode) {
       isFallbackMode = false;
       toast.success('เชื่อมต่อสำเร็จ: ข้อมูลจริงพร้อมใช้งาน');
     }
-    
+
     return response.data;
   } catch (error) {
     // Check if it's a network error or 500 (Server Error)
@@ -49,10 +49,10 @@ const handleRequest = async (requestFn, mockDataFn) => {
         console.warn('API unavailable, switching to Mock Data');
         toast.warning('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้: ใช้ข้อมูลจำลอง');
       }
-      
+
       // Simulate network delay for realistic feel
       await new Promise(resolve => setTimeout(resolve, 800));
-      
+
       // Return mock data
       return typeof mockDataFn === 'function' ? mockDataFn() : mockDataFn;
     }
@@ -62,13 +62,13 @@ const handleRequest = async (requestFn, mockDataFn) => {
 };
 
 // API Methods
-export const fetchDashboardStats = (date) => 
+export const fetchDashboardStats = (date) =>
   handleRequest(
     () => api.get(`/dashboard?date=${date}`),
     mockStats
   );
 
-export const fetchHistory = (date, search) => 
+export const fetchHistory = (date, search) =>
   handleRequest(
     () => api.get(`/history?date=${date}&search=${search}`),
     () => {
@@ -78,28 +78,41 @@ export const fetchHistory = (date, search) =>
     }
   );
 
-export const fetchIpData = () => 
+export const fetchIpData = () =>
   handleRequest(
     () => api.get('/ip'),
     mockIpData
   );
 
-export const uploadFile = (formData) => 
+export const uploadFile = (formData) =>
   handleRequest(
     () => api.post('/upload', formData),
     mockUploadResponse
   );
 
-export const clearData = () => 
+export const clearData = (mode = 'old') =>
   handleRequest(
-    () => api.post('/clear'),
-    { message: 'Mock data cleared' }
+    () => api.post('/clear', { mode }),
+    {
+      message:
+        mode === 'all'
+          ? 'ล้างข้อมูลทั้งหมดแล้ว (mock)'
+          : mode === 'today'
+            ? 'ล้างข้อมูลวันนี้แล้ว (mock)'
+            : 'ล้างข้อมูลเก่าแล้ว (mock)',
+    }
   );
 
-export const scanAwb = (awb) => 
+export const scanAwb = (awb) =>
   handleRequest(
     () => api.post('/scan', { awb }),
     () => mockScanResponse(awb)
+  );
+
+export const deleteRecord = (id) =>
+  handleRequest(
+    () => api.post('/delete', { id }),
+    { message: 'ลบรายการเรียบร้อยแล้ว (mock)' }
   );
 
 export const exportReport = async (type, format, date) => {

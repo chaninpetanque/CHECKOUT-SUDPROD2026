@@ -10,20 +10,22 @@ import StatCard from './dashboard/StatCard';
 import UploadSection from './dashboard/UploadSection';
 import ScanSection from './dashboard/ScanSection';
 import HistoryTable from './dashboard/HistoryTable';
+import ClearDataModal from './dashboard/ClearDataModal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
 import { Skeleton } from './ui/skeleton';
 import { Calendar } from './ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '../lib/utils';
-import { 
-  fetchDashboardStats, 
-  fetchHistory, 
-  fetchIpData, 
-  uploadFile, 
-  clearData, 
-  scanAwb, 
-  exportReport 
+import {
+  fetchDashboardStats,
+  fetchHistory,
+  fetchIpData,
+  uploadFile,
+  clearData,
+  scanAwb,
+  exportReport,
+  deleteRecord
 } from '../lib/api';
 
 const Dashboard = () => {
@@ -38,7 +40,8 @@ const Dashboard = () => {
   const [autoExportEnabled, setAutoExportEnabled] = useState(true);
   const [lastAutoExportDate, setLastAutoExportDate] = useState('');
   const [exporting, setExporting] = useState(false);
-  
+  const [showClearModal, setShowClearModal] = useState(false);
+
   const queryClient = useQueryClient();
 
   // --- Queries ---
@@ -75,16 +78,29 @@ const Dashboard = () => {
   });
 
   const clearMutation = useMutation({
-    mutationFn: clearData,
+    mutationFn: (mode) => clearData(mode),
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries(['dashboard']);
+      queryClient.invalidateQueries(['history']);
     },
     onError: () => {
-      toast.error('Failed to clear data');
+      toast.error('ล้างข้อมูลล้มเหลว กรุณาลองใหม่');
     }
   });
-  
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteRecord(id),
+    onSuccess: () => {
+      toast.success('ลบรายการเรียบร้อยแล้ว');
+      queryClient.invalidateQueries(['history']);
+      queryClient.invalidateQueries(['dashboard']);
+    },
+    onError: () => {
+      toast.error('ลบรายการล้มเหลว');
+    }
+  });
+
   const scanMutation = useMutation({
     mutationFn: (awb) => scanAwb(awb),
     onSuccess: (data) => {
@@ -118,16 +134,22 @@ const Dashboard = () => {
   };
 
   const handleClear = () => {
-    if (window.confirm('คุณแน่ใจหรือไม่ที่จะล้างข้อมูลเก่า?')) {
-      clearMutation.mutate();
-    }
+    setShowClearModal(true);
+  };
+
+  const handleConfirmClear = (mode) => {
+    clearMutation.mutate(mode);
+  };
+
+  const handleDelete = (id) => {
+    deleteMutation.mutate(id);
   };
 
   const downloadReportFn = useCallback(async (type, format, isAuto = false) => {
     try {
       setExporting(true);
       const res = await exportReport(type, format, selectedDate);
-      
+
       const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/octet-stream' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -138,7 +160,7 @@ const Dashboard = () => {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      
+
       if (isAuto) {
         toast.info('ส่งออกรายงานอัตโนมัติเรียบร้อยแล้ว');
         setScanStatus({
@@ -168,15 +190,15 @@ const Dashboard = () => {
 
   const getScanUrl = () => {
     if (typeof window === 'undefined') return '';
-    
+
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
+
     if (isLocalhost && ipData?.ip && ipData.ip !== 'localhost') {
       const protocol = window.location.protocol;
       const port = window.location.port;
       return `${protocol}//${ipData.ip}${port ? `:${port}` : ''}/scan`;
     }
-    
+
     return `${window.location.origin}/scan`;
   };
 
@@ -194,7 +216,13 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      
+      <ClearDataModal
+        open={showClearModal}
+        onOpenChange={setShowClearModal}
+        onConfirm={handleConfirmClear}
+        isLoading={clearMutation.isPending}
+      />
+
       {/* Date Picker Header */}
       <div className="flex flex-col items-center justify-center space-y-2 mb-6">
         <h2 className="text-lg font-semibold text-gray-700">สรุปผลประจำวัน</h2>
@@ -232,36 +260,36 @@ const Dashboard = () => {
       {/* Stats Overview */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statsLoading ? (
-           Array(4).fill(0).map((_, i) => (
-             <Skeleton key={i} className="h-32 rounded-xl" />
-           ))
+          Array(4).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))
         ) : (
           <>
-            <StatCard 
-              title="ทั้งหมดที่คาดหวัง" 
-              value={stats?.total_expected || 0} 
-              icon={Package} 
+            <StatCard
+              title="ทั้งหมดที่คาดหวัง"
+              value={stats?.total_expected || 0}
+              icon={Package}
               className="border-blue-100 bg-blue-50/50"
               valueClassName="text-blue-700"
             />
-            <StatCard 
-              title="สแกนแล้ว" 
-              value={stats?.scanned || 0} 
-              icon={CircleCheck} 
+            <StatCard
+              title="สแกนแล้ว"
+              value={stats?.scanned || 0}
+              icon={CircleCheck}
               className="border-green-100 bg-green-50/50"
               valueClassName="text-green-700"
             />
-            <StatCard 
-              title="ตกหล่น" 
-              value={stats?.missing || 0} 
-              icon={CircleX} 
+            <StatCard
+              title="ตกหล่น"
+              value={stats?.missing || 0}
+              icon={CircleX}
               className="border-gray-100 bg-gray-50/50"
               valueClassName="text-gray-700"
             />
-            <StatCard 
-              title="เกินจำนวน" 
-              value={stats?.surplus || 0} 
-              icon={TriangleAlert} 
+            <StatCard
+              title="เกินจำนวน"
+              value={stats?.surplus || 0}
+              icon={TriangleAlert}
               className="border-red-100 bg-red-50/50"
               valueClassName="text-red-700"
             />
@@ -272,16 +300,16 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Controls */}
         <div className="space-y-8 lg:col-span-2">
-          <UploadSection 
-            file={file} 
-            setFile={setFile} 
-            onUpload={handleUpload} 
+          <UploadSection
+            file={file}
+            setFile={setFile}
+            onUpload={handleUpload}
             isUploading={uploadMutation.isPending}
             onClear={handleClear}
             isClearing={clearMutation.isPending}
           />
-          
-          <ScanSection 
+
+          <ScanSection
             barcodeModeEnabled={barcodeModeEnabled}
             setBarcodeModeEnabled={setBarcodeModeEnabled}
             scannerInput={scannerInput}
@@ -299,7 +327,7 @@ const Dashboard = () => {
               <Skeleton className="h-64 w-full" />
             </div>
           ) : (
-            <HistoryTable 
+            <HistoryTable
               history={history || []}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
@@ -307,14 +335,16 @@ const Dashboard = () => {
               isExporting={exporting}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
+              onDelete={handleDelete}
+              isDeleting={deleteMutation.isPending}
             />
           )}
         </div>
 
         {/* Right Column: Utilities */}
         <div className="space-y-8">
-           {/* Mobile Scanner QR */}
-           <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+          {/* Mobile Scanner QR */}
+          <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-yellow-800">
                 <QrCode className="h-5 w-5" /> สแกนเนอร์มือถือ
@@ -325,12 +355,12 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-white p-4 rounded-xl shadow-sm border border-yellow-100 flex justify-center">
-                 <QRCode
-                    value={scanUrl}
-                    size={128}
-                    style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    viewBox={`0 0 256 256`}
-                 />
+                <QRCode
+                  value={scanUrl}
+                  size={128}
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                  viewBox={`0 0 256 256`}
+                />
               </div>
               <div className="text-center">
                 <p className="text-sm font-mono bg-white/50 p-2 rounded border border-yellow-100 text-yellow-800 break-all">
@@ -354,22 +384,22 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-2">
-                <Button 
-                  variant={exportFormat === 'csv' ? 'default' : 'outline'} 
+                <Button
+                  variant={exportFormat === 'csv' ? 'default' : 'outline'}
                   onClick={() => setExportFormat('csv')}
                   className="flex-1"
                 >
                   CSV
                 </Button>
-                <Button 
-                  variant={exportFormat === 'xlsx' ? 'default' : 'outline'} 
+                <Button
+                  variant={exportFormat === 'xlsx' ? 'default' : 'outline'}
                   onClick={() => setExportFormat('xlsx')}
                   className="flex-1"
                 >
                   Excel
                 </Button>
               </div>
-              
+
               <div className="space-y-2">
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('all')}>
                   <FileText className="mr-2 h-4 w-4" /> ส่งออกข้อมูลทั้งหมด
@@ -384,7 +414,7 @@ const Dashboard = () => {
 
               <div className="flex items-center justify-between pt-4 border-t">
                 <span className="text-sm font-medium text-gray-700">ส่งออกอัตโนมัติเมื่อครบ</span>
-                <div 
+                <div
                   className={cn("w-10 h-6 rounded-full p-1 cursor-pointer transition-colors", autoExportEnabled ? "bg-green-500" : "bg-gray-300")}
                   onClick={() => setAutoExportEnabled(!autoExportEnabled)}
                 >

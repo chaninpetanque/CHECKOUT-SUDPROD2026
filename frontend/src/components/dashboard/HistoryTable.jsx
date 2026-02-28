@@ -3,17 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Search, Download, FileText } from 'lucide-react';
+import { Search, Download, FileText, Trash2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-const HistoryTable = ({ 
-  history, 
-  searchTerm, 
-  setSearchTerm, 
-  handleExport, 
-  isExporting, 
+const HistoryTable = ({
+  history,
+  searchTerm,
+  setSearchTerm,
+  handleExport,
+  isExporting,
   selectedDate,
-  setSelectedDate 
+  setSelectedDate,
+  onDelete,
+  isDeleting,
 }) => {
   return (
     <Card className="bg-white shadow-md border border-gray-100">
@@ -32,10 +34,10 @@ const HistoryTable = ({
               className="pl-9 w-full sm:w-[200px]"
             />
           </div>
-          <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={() => handleExport('all')} 
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleExport('all')}
             disabled={isExporting}
             title="ส่งออกทั้งหมด"
           >
@@ -52,7 +54,7 @@ const HistoryTable = ({
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[100px]">เวลา</th>
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">เลขพัสดุ</th>
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">สถานะ</th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">ประเภท</th>
+                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">จัดการ</th>
                 </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0">
@@ -72,31 +74,42 @@ const HistoryTable = ({
                   </tr>
                 ) : (
                   history.map((item) => (
-                    <tr key={item.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                    <tr key={item.id} className="border-b transition-colors hover:bg-muted/50 group">
                       <td className="p-4 align-middle font-mono text-xs text-gray-500">
-                        {new Date(item.scanned_at).toLocaleTimeString('th-TH')}
+                        {item.scanned_at
+                          ? new Date(item.scanned_at).toLocaleTimeString('th-TH')
+                          : new Date(item.updated_at).toLocaleTimeString('th-TH')}
                       </td>
                       <td className="p-4 align-middle font-medium font-mono">
                         {item.awb}
                       </td>
                       <td className="p-4 align-middle">
-                        <Badge 
+                        <Badge
                           variant={
-                            item.status === 'match' ? 'success' : 
-                            item.status === 'duplicate' ? 'warning' : 
-                            'destructive'
+                            item.status === 'match' || item.status === 'scanned' ? 'success' :
+                              item.status === 'duplicate' ? 'warning' :
+                                'destructive'
                           }
                           className="capitalize"
                         >
-                          {item.status === 'match' ? 'ปกติ' : 
-                           item.status === 'duplicate' ? 'ซ้ำ' : 
-                           'เกิน'}
+                          {item.status === 'match' || item.status === 'scanned' ? 'ปกติ' :
+                            item.status === 'duplicate' ? 'ซ้ำ' :
+                              'เกิน'}
                         </Badge>
                       </td>
                       <td className="p-4 align-middle text-right">
-                        <span className="text-xs text-gray-400 uppercase tracking-wider">
-                          สแกน
-                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={cn(
+                            'h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600 hover:bg-red-50',
+                          )}
+                          title="ลบรายการนี้"
+                          disabled={isDeleting}
+                          onClick={() => onDelete(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </td>
                     </tr>
                   ))
