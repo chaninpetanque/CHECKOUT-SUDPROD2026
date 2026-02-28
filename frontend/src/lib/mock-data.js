@@ -3,7 +3,9 @@ export const mockStats = {
   total_expected: 150,
   scanned: 45,
   missing: 105,
-  surplus: 2
+  surplus: 2,
+  missing_awbs: ['TH111111111', 'TH222222222', 'TH333333333'],
+  surplus_awbs: ['UNKNOWN123', 'UNKNOWN456'],
 };
 
 export const mockHistory = [

@@ -25,25 +25,41 @@ export default async function handler(req, res) {
     return;
   }
 
-  // --- Supabase Logic ---
-  const { data, error } = await supabase
-    .from('parcels')
-    .select('status', { count: 'exact' })
-    .eq('date', date);
+  // --- Supabase Logic (parallel aggregate queries + AWB lists) ---
+  const [uploadedRes, scannedRes, surplusRes, missingAwbsRes, surplusAwbsRes] = await Promise.all([
+    supabase.from('parcels').select('*', { count: 'exact', head: true })
+      .eq('date', date).eq('status', 'uploaded'),
+    supabase.from('parcels').select('*', { count: 'exact', head: true })
+      .eq('date', date).eq('status', 'scanned'),
+    supabase.from('parcels').select('*', { count: 'exact', head: true })
+      .eq('date', date).eq('status', 'surplus'),
+    // Fetch actual AWB lists (limited to 200)
+    supabase.from('parcels').select('awb')
+      .eq('date', date).eq('status', 'uploaded')
+      .order('created_at', { ascending: false }).limit(200),
+    supabase.from('parcels').select('awb')
+      .eq('date', date).eq('status', 'surplus')
+      .order('created_at', { ascending: false }).limit(200),
+  ]);
 
-  if (error) {
-    res.status(500).json({ error: error.message });
+  const firstError = uploadedRes.error || scannedRes.error || surplusRes.error
+    || missingAwbsRes.error || surplusAwbsRes.error;
+  if (firstError) {
+    res.status(500).json({ error: firstError.message });
     return;
   }
 
-  const pending = data.filter((row) => row.status === 'uploaded').length;
-  const scanned = data.filter((row) => row.status === 'scanned').length;
-  const surplus = data.filter((row) => row.status === 'surplus').length;
+  const pending = uploadedRes.count ?? 0;
+  const scanned = scannedRes.count ?? 0;
+  const surplus = surplusRes.count ?? 0;
 
+  res.setHeader('Cache-Control', 'public, max-age=5');
   res.json({
     total_expected: pending + scanned,
     scanned,
     missing: pending,
-    surplus
+    surplus,
+    missing_awbs: (missingAwbsRes.data || []).map((r) => r.awb),
+    surplus_awbs: (surplusAwbsRes.data || []).map((r) => r.awb),
   });
 }

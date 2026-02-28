@@ -10,6 +10,7 @@ import StatCard from './dashboard/StatCard';
 import UploadSection from './dashboard/UploadSection';
 import ScanSection from './dashboard/ScanSection';
 import HistoryTable from './dashboard/HistoryTable';
+import AwbListSection from './dashboard/AwbListSection';
 import ClearDataModal from './dashboard/ClearDataModal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
@@ -113,6 +114,9 @@ const Dashboard = () => {
       if (data.status === 'match') toast.success(`จับคู่สำเร็จ: ${data.awb}`);
       else if (data.status === 'duplicate') toast.warning(`ซ้ำ: ${data.awb}`);
       else if (data.status === 'surplus') toast.error(`เกินจำนวน: ${data.awb}`);
+      // Refresh history and dashboard immediately after scan
+      queryClient.invalidateQueries({ queryKey: ['history'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
     onError: () => {
       const errorMsg = 'ข้อผิดพลาดเครือข่าย';
@@ -297,6 +301,14 @@ const Dashboard = () => {
         )}
       </div>
 
+      {/* Surplus & Missing AWB Lists */}
+      {!statsLoading && (
+        <AwbListSection
+          surplusAwbs={stats?.surplus_awbs || []}
+          missingAwbs={stats?.missing_awbs || []}
+        />
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Controls */}
         <div className="space-y-8 lg:col-span-2">
@@ -425,6 +437,8 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
+
+      {/* Clear Data Modal is rendered at top of component as <ClearDataModal /> */}
     </div>
   );
 };

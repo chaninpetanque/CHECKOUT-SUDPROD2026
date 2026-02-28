@@ -1,4 +1,5 @@
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import formidable from 'formidable';
 import xlsx from 'xlsx';
@@ -53,7 +54,7 @@ export default async function handler(req, res) {
   const form = formidable({
     multiples: false,
     keepExtensions: true,
-    uploadDir: '/tmp',
+    uploadDir: os.tmpdir(),
   });
   const [fields, files] = await form.parse(req);
   const file = Array.isArray(files.file) ? files.file[0] : files.file;
@@ -82,46 +83,49 @@ export default async function handler(req, res) {
 
     const awbList = rows.map(extractAwb).filter(Boolean);
     if (!awbList.length) {
-    res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: 0, errors: rows.length });
-    return;
-  }
-
-  // --- Mock Service Fallback ---
-  if (!isSupabaseReady) {
-    const result = mockService.uploadRows(awbList, today);
-    res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: result.inserted, errors: result.errors });
-    return;
-  }
-
-  // --- Supabase Logic ---
-  // 1. Identify duplicates in existing DB
-  const uniqueAwbs = Array.from(new Set(awbList));
-    let existingCount = 0;
-
-    for (const batch of chunk(uniqueAwbs, 400)) {
-      const { count, error } = await supabase
-        .from('parcels')
-        .select('awb', { count: 'exact' })
-        .eq('date', today)
-        .in('awb', batch);
-      if (error) {
-        res.status(500).json({ error: error.message });
-        return;
-      }
-      existingCount += count ?? 0;
+      res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: 0, errors: rows.length });
+      return;
     }
 
-    for (const batch of chunk(uniqueAwbs, 500)) {
-      const payload = batch.map((awb) => ({ awb, status: 'uploaded', date: today }));
-      const { error } = await supabase
-        .from('parcels')
-        .insert(payload, { onConflict: 'awb,date', ignoreDuplicates: true });
-      if (error) {
-        res.status(500).json({ error: error.message });
-        return;
-      }
+    // --- Mock Service Fallback ---
+    if (!isSupabaseReady) {
+      const result = mockService.uploadRows(awbList, today);
+      res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: result.inserted, errors: result.errors });
+      return;
     }
 
+    // --- Supabase Logic (parallel batch queries) ---
+    const uniqueAwbs = Array.from(new Set(awbList));
+
+    // 1. Check duplicates — all batches in parallel
+    const dupResults = await Promise.all(
+      chunk(uniqueAwbs, 400).map((batch) =>
+        supabase.from('parcels').select('awb', { count: 'exact', head: true })
+          .eq('date', today).in('awb', batch)
+      )
+    );
+    const dupError = dupResults.find((r) => r.error);
+    if (dupError?.error) {
+      res.status(500).json({ error: dupError.error.message });
+      return;
+    }
+    const existingCount = dupResults.reduce((sum, r) => sum + (r.count ?? 0), 0);
+
+    // 2. Insert — all batches in parallel
+    const insertResults = await Promise.all(
+      chunk(uniqueAwbs, 500).map((batch) => {
+        const payload = batch.map((awb) => ({ awb, status: 'uploaded', date: today }));
+        return supabase.from('parcels')
+          .insert(payload, { onConflict: 'awb,date', ignoreDuplicates: true });
+      })
+    );
+    const insertError = insertResults.find((r) => r.error);
+    if (insertError?.error) {
+      res.status(500).json({ error: insertError.error.message });
+      return;
+    }
+
+    // 3. Update surplus → scanned for matching AWBs
     const { error: updateError } = await supabase
       .from('parcels')
       .update({ status: 'scanned', updated_at: new Date().toISOString() })

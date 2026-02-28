@@ -1,5 +1,3 @@
-import xlsx from 'xlsx';
-import PDFDocument from 'pdfkit';
 import { supabase, isSupabaseReady } from '../lib/supabase.js';
 import { mockService } from '../lib/mock-service.js';
 
@@ -57,6 +55,7 @@ export default async function handler(req, res) {
   }
 
   if (format === 'xlsx' || format === 'excel') {
+    const xlsx = await import('xlsx');
     const sheetData = rows.map((row) => ({
       'เลขพัสดุ': row.awb,
       'สถานะ': row.status,
@@ -74,16 +73,11 @@ export default async function handler(req, res) {
   }
 
   if (format === 'pdf') {
+    const { default: PDFDocument } = await import('pdfkit');
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=report-${type}-${date}.pdf`);
     const doc = new PDFDocument({ margin: 30, size: 'A4' });
     doc.pipe(res);
-    // Note: PDFKit might not support Thai fonts out of the box without loading a font file.
-    // Keeping English for PDF content to avoid tofu (squares) unless we add a font.
-    // But since the user asked for Thai, I should try to at least change the structure or warn about fonts.
-    // For now, let's keep English for PDF content to be safe, or just use transliteration?
-    // Actually, let's keep English for PDF content to avoid rendering issues as I cannot easily upload a Thai font right now.
-    // But I will change the error message below.
     doc.fontSize(16).text(`Inventory Report (${date})`, { align: 'center' });
     doc.moveDown();
     doc.fontSize(12).text(`Type: ${type}`);

@@ -12,6 +12,14 @@ export default defineConfig({
   build: {
     outDir: '../dist',
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          query: ['@tanstack/react-query', 'axios'],
+          ui: ['framer-motion', 'lucide-react', 'sonner'],
+        }
+      }
+    }
   }
 })

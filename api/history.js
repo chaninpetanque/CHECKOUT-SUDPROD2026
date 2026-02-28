@@ -41,5 +41,6 @@ export default async function handler(req, res) {
     return;
   }
 
+  res.setHeader('Cache-Control', 'public, max-age=3');
   res.json(data);
 }
