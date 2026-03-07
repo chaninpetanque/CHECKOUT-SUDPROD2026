@@ -1,13 +1,14 @@
 import { supabase, isSupabaseReady } from '../lib/supabase.js';
 import { mockService } from '../lib/mock-service.js';
+import { getTodayDateTH } from '../lib/timezone.js';
 
-const getTodayDate = () => new Date().toISOString().split('T')[0];
+const getTodayDate = getTodayDateTH;
 
 const getQueryDate = (req) => {
   const host = req.headers.host || 'localhost';
   const url = new URL(req.url, `http://${host}`);
   const dateParam = url.searchParams.get('date');
-  return dateParam || new Date().toISOString().split('T')[0];
+  return dateParam || getTodayDateTH();
 };
 
 export default async function handler(req, res) {
@@ -59,6 +60,7 @@ export default async function handler(req, res) {
     scanned,
     missing: pending,
     surplus,
+    total_scanned: scanned + surplus,
     missing_awbs: (missingAwbsRes.data || []).map((r) => r.awb),
     surplus_awbs: (surplusAwbsRes.data || []).map((r) => r.awb),
   });

@@ -1,7 +1,8 @@
 import { supabase, isSupabaseReady } from '../lib/supabase.js';
 import { mockService } from '../lib/mock-service.js';
+import { getTodayDateTH } from '../lib/timezone.js';
 
-const getTodayDate = () => new Date().toISOString().split('T')[0];
+const getTodayDate = getTodayDateTH;
 
 const getQuery = (req) => {
   const url = new URL(req.url, `http://${req.headers.host}`);

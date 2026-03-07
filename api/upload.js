@@ -6,8 +6,9 @@ import xlsx from 'xlsx';
 import csv from 'csv-parser';
 import { supabase, isSupabaseReady } from '../lib/supabase.js';
 import { mockService } from '../lib/mock-service.js';
+import { getTodayDateTH, getNowTH } from '../lib/timezone.js';
 
-const getTodayDate = () => new Date().toISOString().split('T')[0];
+const getTodayDate = getTodayDateTH;
 
 const extractAwb = (row) => {
   if (!row || typeof row !== 'object') return '';
@@ -128,7 +129,7 @@ export default async function handler(req, res) {
     // 3. Update surplus → scanned for matching AWBs
     const { error: updateError } = await supabase
       .from('parcels')
-      .update({ status: 'scanned', updated_at: new Date().toISOString() })
+      .update({ status: 'scanned', updated_at: getNowTH() })
       .eq('date', today)
       .eq('status', 'surplus')
       .in('awb', uniqueAwbs);

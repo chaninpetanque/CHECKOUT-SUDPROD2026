@@ -77,8 +77,8 @@ const HistoryTable = ({
                     <tr key={item.id} className="border-b transition-colors hover:bg-muted/50 group">
                       <td className="p-4 align-middle font-mono text-xs text-gray-500">
                         {item.scanned_at
-                          ? new Date(item.scanned_at).toLocaleTimeString('th-TH')
-                          : new Date(item.updated_at).toLocaleTimeString('th-TH')}
+                          ? new Date(item.scanned_at).toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })
+                          : new Date(item.updated_at).toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })}
                       </td>
                       <td className="p-4 align-middle font-medium font-mono">
                         {item.awb}

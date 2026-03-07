@@ -30,11 +30,13 @@ const getLocalIp = () => {
   return 'localhost';
 };
 
-// Helper to get current date in YYYY-MM-DD format
+// Helper to get current date in YYYY-MM-DD format (Thailand, UTC+7)
+const THAILAND_OFFSET_MS = 7 * 60 * 60 * 1000;
 const getTodayDate = () => {
-  const date = new Date();
+  const date = new Date(Date.now() + THAILAND_OFFSET_MS);
   return date.toISOString().split('T')[0];
 };
+const getNowTH = () => new Date(Date.now() + THAILAND_OFFSET_MS).toISOString();
 
 // --- API Routes ---
 
@@ -127,7 +129,7 @@ app.post('/api/scan', (req, res) => {
     if (row) {
       if (row.status === 'uploaded') {
         // Match found, update to scanned
-        db.run(`UPDATE parcels SET status = 'scanned', updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [row.id], (err) => {
+        db.run(`UPDATE parcels SET status = 'scanned', updated_at = ? WHERE id = ?`, [getNowTH(), row.id], (err) => {
           if (err) return res.status(500).json({ error: err.message });
           res.json({ status: 'match', message: '✅ Match Found', awb });
         });

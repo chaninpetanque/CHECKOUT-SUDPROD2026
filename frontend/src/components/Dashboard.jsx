@@ -11,6 +11,7 @@ import UploadSection from './dashboard/UploadSection';
 import ScanSection from './dashboard/ScanSection';
 import HistoryTable from './dashboard/HistoryTable';
 import AwbListSection from './dashboard/AwbListSection';
+import SummaryTotals from './dashboard/SummaryTotals';
 import ClearDataModal from './dashboard/ClearDataModal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Button } from './ui/button';
@@ -31,7 +32,7 @@ import {
 
 const Dashboard = () => {
   const [file, setFile] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().split('T')[0]);
   const [searchTerm, setSearchTerm] = useState('');
   const [barcodeModeEnabled, setBarcodeModeEnabled] = useState(false);
   const [scannerInput, setScannerInput] = useState('');
@@ -109,7 +110,7 @@ const Dashboard = () => {
         status: data.status,
         message: data.message,
         awb: data.awb,
-        time: new Date().toLocaleTimeString('th-TH')
+        time: new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })
       });
       if (data.status === 'match') toast.success(`จับคู่สำเร็จ: ${data.awb}`);
       else if (data.status === 'duplicate') toast.warning(`ซ้ำ: ${data.awb}`);
@@ -124,7 +125,7 @@ const Dashboard = () => {
         status: 'error',
         message: errorMsg,
         awb: scannerInput,
-        time: new Date().toLocaleTimeString('th-TH')
+        time: new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })
       });
       toast.error(errorMsg);
     }
@@ -171,7 +172,7 @@ const Dashboard = () => {
           status: 'export',
           message: 'ส่งออกรายงานอัตโนมัติ',
           awb: '',
-          time: new Date().toLocaleTimeString('th-TH')
+          time: new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })
         });
       }
     } catch (error) {
@@ -300,6 +301,11 @@ const Dashboard = () => {
           </>
         )}
       </div>
+
+      {/* Summary Totals */}
+      {!statsLoading && (
+        <SummaryTotals stats={stats} />
+      )}
 
       {/* Surplus & Missing AWB Lists */}
       {!statsLoading && (

@@ -1,7 +1,8 @@
 import { supabase, isSupabaseReady } from '../lib/supabase.js';
 import { mockService } from '../lib/mock-service.js';
+import { getTodayDateTH, getNowTH } from '../lib/timezone.js';
 
-const getTodayDate = () => new Date().toISOString().split('T')[0];
+const getTodayDate = getTodayDateTH;
 
 const parseBody = async (req) => {
   if (req.body && typeof req.body === 'object') return req.body;
@@ -54,7 +55,7 @@ export default async function handler(req, res) {
     if (row.status === 'uploaded') {
       const { error: updateError } = await supabase
         .from('parcels')
-        .update({ status: 'scanned', updated_at: new Date().toISOString() })
+        .update({ status: 'scanned', updated_at: getNowTH() })
         .eq('id', row.id);
       if (updateError) {
         res.status(500).json({ error: updateError.message });
