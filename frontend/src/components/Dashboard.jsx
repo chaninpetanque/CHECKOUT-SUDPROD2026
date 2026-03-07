@@ -38,7 +38,7 @@ const Dashboard = () => {
   const [scannerInput, setScannerInput] = useState('');
   const [scannerFocused, setScannerFocused] = useState(false);
   const [scanStatus, setScanStatus] = useState(null);
-  const [exportFormat, setExportFormat] = useState('csv');
+  const exportFormat = 'xlsx';
   const [autoExportEnabled, setAutoExportEnabled] = useState(true);
   const [lastAutoExportDate, setLastAutoExportDate] = useState('');
   const [exporting, setExporting] = useState(false);
@@ -262,48 +262,14 @@ const Dashboard = () => {
         </Popover>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {statsLoading ? (
-          Array(4).fill(0).map((_, i) => (
-            <Skeleton key={i} className="h-32 rounded-xl" />
-          ))
-        ) : (
-          <>
-            <StatCard
-              title="ทั้งหมดที่คาดหวัง"
-              value={stats?.total_expected || 0}
-              icon={Package}
-              className="border-blue-100 bg-blue-50/50"
-              valueClassName="text-blue-700"
-            />
-            <StatCard
-              title="สแกนแล้ว"
-              value={stats?.scanned || 0}
-              icon={CircleCheck}
-              className="border-green-100 bg-green-50/50"
-              valueClassName="text-green-700"
-            />
-            <StatCard
-              title="ตกหล่น"
-              value={stats?.missing || 0}
-              icon={CircleX}
-              className="border-gray-100 bg-gray-50/50"
-              valueClassName="text-gray-700"
-            />
-            <StatCard
-              title="เกินจำนวน"
-              value={stats?.surplus || 0}
-              icon={TriangleAlert}
-              className="border-red-100 bg-red-50/50"
-              valueClassName="text-red-700"
-            />
-          </>
-        )}
-      </div>
-
       {/* Summary Totals */}
-      {!statsLoading && (
+      {statsLoading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array(4).fill(0).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+      ) : (
         <SummaryTotals stats={stats} />
       )}
 
@@ -401,22 +367,6 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Button
-                  variant={exportFormat === 'csv' ? 'default' : 'outline'}
-                  onClick={() => setExportFormat('csv')}
-                  className="flex-1"
-                >
-                  CSV
-                </Button>
-                <Button
-                  variant={exportFormat === 'xlsx' ? 'default' : 'outline'}
-                  onClick={() => setExportFormat('xlsx')}
-                  className="flex-1"
-                >
-                  Excel
-                </Button>
-              </div>
 
               <div className="space-y-2">
                 <Button variant="outline" className="w-full justify-start" onClick={() => handleExport('all')}>

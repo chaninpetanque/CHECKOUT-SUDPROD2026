@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardContent } from '../ui/card';
 import { cn } from '../../lib/utils';
-import { ScanLine, FileOutput, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ScanLine, FileOutput, AlertTriangle, CheckCircle2, CircleX } from 'lucide-react';
 
+// eslint-disable-next-line no-unused-vars
 const SummaryItem = ({ icon: Icon, label, value, color, bgGradient, percentage, breakdown }) => (
     <Card className={cn('relative overflow-hidden border-0 shadow-lg', bgGradient)}>
         <CardContent className="p-5">
@@ -72,6 +73,15 @@ const themes = {
             icon: 'text-emerald-600',
         },
     },
+    missing: {
+        bgGradient: 'bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100',
+        color: {
+            label: 'text-amber-600',
+            value: 'text-amber-900',
+            iconBg: 'bg-amber-100',
+            icon: 'text-amber-600',
+        },
+    },
 };
 
 const SummaryTotals = ({ stats }) => {
@@ -81,6 +91,7 @@ const SummaryTotals = ({ stats }) => {
     const totalExpected = stats.total_expected ?? 0;
     const surplus = stats.surplus ?? 0;
     const matched = stats.scanned ?? 0;
+    const missing = stats.missing ?? 0;
 
     const matchPercent = totalExpected > 0
         ? Math.round((matched / totalExpected) * 100)
@@ -91,7 +102,7 @@ const SummaryTotals = ({ stats }) => {
             <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                 📊 สรุปยอดรวม
             </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <SummaryItem
                     icon={ScanLine}
                     label="สแกนตรง + เกิน (รวม)"
@@ -104,6 +115,12 @@ const SummaryTotals = ({ stats }) => {
                     label="ยอดส่งออก (ไฟล์ขนส่ง)"
                     value={totalExpected}
                     {...themes.exported}
+                />
+                <SummaryItem
+                    icon={CircleX}
+                    label="ตกหล่น"
+                    value={missing}
+                    {...themes.missing}
                 />
                 <SummaryItem
                     icon={AlertTriangle}
