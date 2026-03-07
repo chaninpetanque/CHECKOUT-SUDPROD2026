@@ -144,23 +144,36 @@ const Scanner = () => {
       // Only initialize if element exists
       if (!document.getElementById("reader")) return;
 
-      const scanner = new Html5QrcodeScanner(
-        "reader",
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          showTorchButtonIfSupported: true
-        },
-        false
-      );
+      try {
+        const scanner = new Html5QrcodeScanner(
+          "reader",
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+            showTorchButtonIfSupported: true,
+            rememberLastUsedCamera: true,
+            videoConstraints: {
+              facingMode: { ideal: "environment" }
+            },
+            experimentalFeatures: {
+              useBarCodeDetectorIfSupported: true
+            }
+          },
+          false
+        );
 
-      scanner.render(onScanSuccess, (err) => {
-        // ignore scan errors to prevent console spam
-      });
-      scannerRef.current = scanner;
-      setScannerReady(true);
-    }, 100);
+        scanner.render(onScanSuccess, () => {
+          // ignore scan errors to prevent console spam
+        });
+        scannerRef.current = scanner;
+        setScannerReady(true);
+      } catch (err) {
+        console.error("Scanner init error:", err);
+        toast.error("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการเข้าถึงกล้อง หรือใช้โหมดกรอกเอง");
+        setManualMode(true);
+      }
+    }, 300);
 
     return () => {
       clearTimeout(timer);
