@@ -16,7 +16,16 @@ const HistoryTable = ({
   setSelectedDate,
   onDelete,
   isDeleting,
+  statusFilter,
+  setStatusFilter,
 }) => {
+  const filterButtons = [
+    { key: 'all', label: 'ทั้งหมด' },
+    { key: 'match', label: 'ปกติ' },
+    { key: 'duplicate', label: 'ซ้ำ' },
+    { key: 'surplus', label: 'เกิน' },
+  ];
+
   return (
     <Card className="bg-white shadow-md border border-gray-100">
       <CardHeader className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -46,6 +55,25 @@ const HistoryTable = ({
         </div>
       </CardHeader>
       <CardContent>
+        {/* Status Filter */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {filterButtons.map(({ key, label }) => (
+            <Button
+              key={key}
+              variant={statusFilter === key ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                statusFilter === key && key === 'match' ? 'bg-green-600 hover:bg-green-700' :
+                  statusFilter === key && key === 'duplicate' ? 'bg-yellow-500 hover:bg-yellow-600' :
+                    statusFilter === key && key === 'surplus' ? 'bg-red-600 hover:bg-red-700' :
+                      ''
+              )}
+              onClick={() => setStatusFilter(key)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
         <div className="rounded-md border">
           <div className="relative w-full overflow-auto">
             <table className="w-full caption-bottom text-sm">

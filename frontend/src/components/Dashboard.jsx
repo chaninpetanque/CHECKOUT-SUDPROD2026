@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Package, CircleCheck, TriangleAlert, CircleX, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon } from 'lucide-react';
+import { Package, CircleCheck, TriangleAlert, CircleX, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon, Volume2, VolumeX } from 'lucide-react';
 import { QRCode } from 'react-qr-code';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
@@ -29,6 +29,7 @@ import {
   exportReport,
   deleteRecord
 } from '../lib/api';
+import { playSound, initAudio } from '../lib/sound';
 
 const Dashboard = () => {
   const [file, setFile] = useState(null);
@@ -43,6 +44,8 @@ const Dashboard = () => {
   const [lastAutoExportDate, setLastAutoExportDate] = useState('');
   const [exporting, setExporting] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const queryClient = useQueryClient();
 
@@ -115,6 +118,7 @@ const Dashboard = () => {
       if (data.status === 'match') toast.success(`จับคู่สำเร็จ: ${data.awb}`);
       else if (data.status === 'duplicate') toast.warning(`ซ้ำ: ${data.awb}`);
       else if (data.status === 'surplus') toast.error(`เกินจำนวน: ${data.awb}`);
+      if (audioEnabled) playSound(data.status);
       // Refresh history and dashboard immediately after scan
       queryClient.invalidateQueries({ queryKey: ['history'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -293,6 +297,22 @@ const Dashboard = () => {
             isClearing={clearMutation.isPending}
           />
 
+          <div className="flex items-center justify-between mb-2">
+            <div />
+            <Button
+              variant={audioEnabled ? 'default' : 'outline'}
+              size="sm"
+              className={audioEnabled ? 'bg-green-600 hover:bg-green-700' : ''}
+              onClick={() => {
+                if (!audioEnabled) initAudio();
+                setAudioEnabled(!audioEnabled);
+              }}
+            >
+              {audioEnabled ? <Volume2 className="h-4 w-4 mr-2" /> : <VolumeX className="h-4 w-4 mr-2" />}
+              {audioEnabled ? 'เสียงเปิด' : 'เปิดเสียง'}
+            </Button>
+          </div>
+
           <ScanSection
             barcodeModeEnabled={barcodeModeEnabled}
             setBarcodeModeEnabled={setBarcodeModeEnabled}
@@ -312,7 +332,11 @@ const Dashboard = () => {
             </div>
           ) : (
             <HistoryTable
-              history={history || []}
+              history={(history || []).filter(item => {
+                if (statusFilter === 'all') return true;
+                if (statusFilter === 'match') return item.status === 'match' || item.status === 'scanned';
+                return item.status === statusFilter;
+              })}
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               handleExport={handleExport}
@@ -321,6 +345,8 @@ const Dashboard = () => {
               setSelectedDate={setSelectedDate}
               onDelete={handleDelete}
               isDeleting={deleteMutation.isPending}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
             />
           )}
         </div>
