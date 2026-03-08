@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Package, ScanBarcode, Menu, X } from 'lucide-react';
+import { Package, ScanBarcode, BarChart3, Menu, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/button';
 
@@ -11,6 +11,7 @@ const Layout = ({ children }) => {
   const navItems = [
     { label: 'แดชบอร์ด', path: '/', icon: Package },
     { label: 'สแกนเนอร์', path: '/scan', icon: ScanBarcode },
+    { label: 'สถิติ', path: '/stats', icon: BarChart3 },
   ];
 
   return (
