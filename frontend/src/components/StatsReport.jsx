@@ -120,18 +120,19 @@ const StatsReport = () => {
     const [pin, setPin] = useState('');
     const [pinError, setPinError] = useState(false);
     const [authenticated, setAuthenticated] = useState(false);
-    const [tab, setTab] = useState('daily'); // 'daily' or 'weekly'
+    const [tab, setTab] = useState('daily'); // 'daily' or 'monthly'
 
     // Date ranges
     const [today] = useState(() => new Date(Date.now() + 7 * 60 * 60 * 1000));
     const dailyFrom = new Date(today);
     dailyFrom.setDate(dailyFrom.getDate() - 6);
-    const weeklyFrom = new Date(today);
-    weeklyFrom.setDate(weeklyFrom.getDate() - 27);
+    const monthlyFrom = new Date(today);
+    monthlyFrom.setMonth(monthlyFrom.getMonth() - 2);
+    monthlyFrom.setDate(1);
 
     const fromDate = tab === 'daily'
         ? dailyFrom.toISOString().split('T')[0]
-        : weeklyFrom.toISOString().split('T')[0];
+        : monthlyFrom.toISOString().split('T')[0];
     const toDate = today.toISOString().split('T')[0];
 
     const { data: rawStats, isLoading } = useQuery({
@@ -149,22 +150,17 @@ const StatsReport = () => {
 
         let processed = rawStats;
 
-        if (tab === 'weekly') {
-            // Group into weeks
-            const weeks = {};
+        if (tab === 'monthly') {
+            // Group into months
+            const thMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const months = {};
             rawStats.forEach((day) => {
                 const d = new Date(day.date);
-                // Get Monday of the week
-                const dayOfWeek = d.getDay();
-                const monday = new Date(d);
-                monday.setDate(d.getDate() - ((dayOfWeek + 6) % 7));
-                const weekKey = monday.toISOString().split('T')[0];
+                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 
-                if (!weeks[weekKey]) {
-                    const sunday = new Date(monday);
-                    sunday.setDate(monday.getDate() + 6);
-                    weeks[weekKey] = {
-                        label: `${monday.getDate()}/${monday.getMonth() + 1} - ${sunday.getDate()}/${sunday.getMonth() + 1}`,
+                if (!months[monthKey]) {
+                    months[monthKey] = {
+                        label: `${thMonths[d.getMonth()]} ${d.getFullYear() + 543}`,
                         total_expected: 0,
                         scanned: 0,
                         missing: 0,
@@ -172,14 +168,14 @@ const StatsReport = () => {
                         total_scanned: 0,
                     };
                 }
-                weeks[weekKey].total_expected += day.total_expected || 0;
-                weeks[weekKey].scanned += day.scanned || 0;
-                weeks[weekKey].missing += day.missing || 0;
-                weeks[weekKey].surplus += day.surplus || 0;
-                weeks[weekKey].total_scanned += day.total_scanned || 0;
+                months[monthKey].total_expected += day.total_expected || 0;
+                months[monthKey].scanned += day.scanned || 0;
+                months[monthKey].missing += day.missing || 0;
+                months[monthKey].surplus += day.surplus || 0;
+                months[monthKey].total_scanned += day.total_scanned || 0;
             });
 
-            processed = Object.entries(weeks)
+            processed = Object.entries(months)
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([, v]) => v);
         } else {
@@ -250,12 +246,12 @@ const StatsReport = () => {
                             <Calendar className="h-4 w-4 mr-1" /> รายวัน
                         </Button>
                         <Button
-                            variant={tab === 'weekly' ? 'default' : 'ghost'}
+                            variant={tab === 'monthly' ? 'default' : 'ghost'}
                             size="sm"
-                            onClick={() => setTab('weekly')}
-                            className={tab === 'weekly' ? '' : 'text-gray-600'}
+                            onClick={() => setTab('monthly')}
+                            className={tab === 'monthly' ? '' : 'text-gray-600'}
                         >
-                            <TrendingUp className="h-4 w-4 mr-1" /> รายสัปดาห์
+                            <TrendingUp className="h-4 w-4 mr-1" /> รายเดือน
                         </Button>
                     </div>
                 </div>
@@ -275,7 +271,7 @@ const StatsReport = () => {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <SummaryCard
                                 icon={Package}
-                                label={`ยอดรวม${tab === 'daily' ? ' 7 วัน' : ' 4 สัปดาห์'}`}
+                                label={`ยอดรวม${tab === 'daily' ? ' 7 วัน' : ' 3 เดือน'}`}
                                 value={totals.expected}
                                 color="bg-blue-500"
                                 bgColor="bg-blue-50 border-blue-200"
@@ -308,7 +304,7 @@ const StatsReport = () => {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-gray-800">
                                     <BarChart3 className="h-5 w-5 text-blue-600" />
-                                    {tab === 'daily' ? 'สถิติรายวัน (7 วันล่าสุด)' : 'สถิติรายสัปดาห์ (4 สัปดาห์ล่าสุด)'}
+                                    {tab === 'daily' ? 'สถิติรายวัน (7 วันล่าสุด)' : 'สถิติรายเดือน (3 เดือนล่าสุด)'}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -338,7 +334,7 @@ const StatsReport = () => {
                                         <thead>
                                             <tr className="border-b bg-gray-50">
                                                 <th className="h-10 px-4 text-left font-medium text-gray-500">
-                                                    {tab === 'daily' ? 'วันที่' : 'สัปดาห์'}
+                                                    {tab === 'daily' ? 'วันที่' : 'เดือน'}
                                                 </th>
                                                 <th className="h-10 px-4 text-right font-medium text-blue-600">คาดหวัง</th>
                                                 <th className="h-10 px-4 text-right font-medium text-emerald-600">สแกนตรง</th>
