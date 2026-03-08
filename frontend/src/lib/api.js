@@ -130,5 +130,29 @@ export const exportReport = async (type, format, date) => {
     throw error;
   }
 };
+export const fetchStats = (from, to, pin) =>
+  handleRequest(
+    () => api.get(`/stats?from=${from}&to=${to}&pin=${pin}`),
+    () => {
+      // Generate mock stats
+      const days = [];
+      const start = new Date(from);
+      const end = new Date(to);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split('T')[0];
+        const total = Math.floor(Math.random() * 150) + 50;
+        const scanned = Math.floor(total * (0.7 + Math.random() * 0.3));
+        days.push({
+          date: dateStr,
+          total_expected: total,
+          scanned,
+          missing: total - scanned,
+          surplus: Math.floor(Math.random() * 10),
+          total_scanned: scanned + Math.floor(Math.random() * 10),
+        });
+      }
+      return days;
+    }
+  );
 
 export default api;

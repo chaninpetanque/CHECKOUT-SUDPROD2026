@@ -7,6 +7,8 @@ import Layout from './components/Layout';
 
 // Lazy load Scanner — only loaded when visiting /scan
 const Scanner = React.lazy(() => import('./components/Scanner'));
+// Lazy load StatsReport — only loaded when visiting /stats
+const StatsReport = React.lazy(() => import('./components/StatsReport'));
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,15 @@ function App() {
               </div>
             }>
               <Scanner />
+            </Suspense>
+          } />
+          <Route path="/stats" element={
+            <Suspense fallback={
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <div>กำลังโหลด...</div>
+              </div>
+            }>
+              <StatsReport />
             </Suspense>
           } />
         </Routes>

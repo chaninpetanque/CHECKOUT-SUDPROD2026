@@ -385,7 +385,24 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Export Options */}
+          {/* Stats Report Link */}
+          <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-purple-800">
+                📊 สรุปสถิติ
+              </CardTitle>
+              <CardDescription className="text-purple-700/80">
+                ดูสถิติรายวัน/รายสัปดาห์
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white" asChild>
+                <a href="/stats">
+                  เปิดหน้าสถิติ <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
