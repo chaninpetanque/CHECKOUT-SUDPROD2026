@@ -272,7 +272,7 @@ const StatsReport = () => {
                             <SummaryCard
                                 icon={Package}
                                 label={`ยอดรวม${tab === 'daily' ? ' 7 วัน' : ' 3 เดือน'}`}
-                                value={totals.expected}
+                                value={totals.scanned + totals.surplus}
                                 color="bg-blue-500"
                                 bgColor="bg-blue-50 border-blue-200"
                             />
