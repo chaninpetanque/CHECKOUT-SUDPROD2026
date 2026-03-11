@@ -336,7 +336,7 @@ const StatsReport = () => {
                                                 <th className="h-10 px-4 text-left font-medium text-gray-500">
                                                     {tab === 'daily' ? 'วันที่' : 'เดือน'}
                                                 </th>
-                                                <th className="h-10 px-4 text-right font-medium text-blue-600">คาดหวัง</th>
+                                                <th className="h-10 px-4 text-right font-medium text-blue-600">ยอดรวม</th>
                                                 <th className="h-10 px-4 text-right font-medium text-emerald-600">สแกนตรง</th>
                                                 <th className="h-10 px-4 text-right font-medium text-amber-600">ตกหล่น</th>
                                                 <th className="h-10 px-4 text-right font-medium text-rose-600">เกิน</th>
@@ -345,13 +345,14 @@ const StatsReport = () => {
                                         </thead>
                                         <tbody>
                                             {chartData.map((row, idx) => {
-                                                const pct = row.total_expected > 0
-                                                    ? Math.round((row.scanned / row.total_expected) * 100)
+                                                const rowTotal = row.scanned + row.surplus;
+                                                const pct = rowTotal > 0
+                                                    ? Math.round((row.scanned / rowTotal) * 100)
                                                     : 0;
                                                 return (
                                                     <tr key={idx} className="border-b hover:bg-gray-50">
                                                         <td className="p-4 font-medium">{row.label || row.date}</td>
-                                                        <td className="p-4 text-right tabular-nums">{row.total_expected}</td>
+                                                        <td className="p-4 text-right tabular-nums font-semibold">{rowTotal}</td>
                                                         <td className="p-4 text-right tabular-nums text-emerald-700 font-semibold">{row.scanned}</td>
                                                         <td className="p-4 text-right tabular-nums text-amber-700">{row.missing}</td>
                                                         <td className="p-4 text-right tabular-nums text-rose-700">{row.surplus}</td>
@@ -371,18 +372,18 @@ const StatsReport = () => {
                                             {/* Totals Row */}
                                             <tr className="bg-gray-100 font-bold">
                                                 <td className="p-4">รวม</td>
-                                                <td className="p-4 text-right tabular-nums">{totals.expected}</td>
+                                                <td className="p-4 text-right tabular-nums">{totals.scanned + totals.surplus}</td>
                                                 <td className="p-4 text-right tabular-nums text-emerald-700">{totals.scanned}</td>
                                                 <td className="p-4 text-right tabular-nums text-amber-700">{totals.missing}</td>
                                                 <td className="p-4 text-right tabular-nums text-rose-700">{totals.surplus}</td>
                                                 <td className="p-4 text-right">
                                                     <span className={cn(
                                                         'px-2 py-0.5 rounded-full text-xs font-bold',
-                                                        totals.expected > 0 && Math.round((totals.scanned / totals.expected) * 100) >= 90
+                                                        (totals.scanned + totals.surplus) > 0 && Math.round((totals.scanned / (totals.scanned + totals.surplus)) * 100) >= 90
                                                             ? 'bg-emerald-100 text-emerald-700'
                                                             : 'bg-amber-100 text-amber-700'
                                                     )}>
-                                                        {totals.expected > 0 ? Math.round((totals.scanned / totals.expected) * 100) : 0}%
+                                                        {(totals.scanned + totals.surplus) > 0 ? Math.round((totals.scanned / (totals.scanned + totals.surplus)) * 100) : 0}%
                                                     </span>
                                                 </td>
                                             </tr>
