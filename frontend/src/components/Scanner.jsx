@@ -21,7 +21,7 @@ const Scanner = () => {
   const audioCtxRef = useRef(null);
   const lastScannedRef = useRef(null);
 
-  const todayDate = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const [todayDate] = useState(() => new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().split('T')[0]);
   const { data: stats } = useQuery({
     queryKey: ['dashboard', todayDate],
     queryFn: () => fetchDashboardStats(todayDate),
