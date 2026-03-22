@@ -27,13 +27,15 @@ export default async function handler(req, res) {
   }
 
   // --- Supabase Logic (parallel aggregate queries + AWB lists) ---
-  const [uploadedRes, scannedRes, surplusRes, missingAwbsRes, surplusAwbsRes] = await Promise.all([
+  const [uploadedRes, scannedRes, surplusRes, cancelledRes, missingAwbsRes, surplusAwbsRes, cancelledAwbsRes] = await Promise.all([
     supabase.from('parcels').select('*', { count: 'exact', head: true })
       .eq('date', date).eq('status', 'uploaded'),
     supabase.from('parcels').select('*', { count: 'exact', head: true })
       .eq('date', date).eq('status', 'scanned'),
     supabase.from('parcels').select('*', { count: 'exact', head: true })
       .eq('date', date).eq('status', 'surplus'),
+    supabase.from('parcels').select('*', { count: 'exact', head: true })
+      .eq('date', date).eq('status', 'cancelled'),
     // Fetch actual AWB lists (limited to 200)
     supabase.from('parcels').select('awb')
       .eq('date', date).eq('status', 'uploaded')
@@ -41,10 +43,13 @@ export default async function handler(req, res) {
     supabase.from('parcels').select('awb')
       .eq('date', date).eq('status', 'surplus')
       .order('created_at', { ascending: false }).limit(200),
+    supabase.from('parcels').select('awb')
+      .eq('date', date).eq('status', 'cancelled')
+      .order('created_at', { ascending: false }).limit(200),
   ]);
 
   const firstError = uploadedRes.error || scannedRes.error || surplusRes.error
-    || missingAwbsRes.error || surplusAwbsRes.error;
+    || cancelledRes.error || missingAwbsRes.error || surplusAwbsRes.error || cancelledAwbsRes.error;
   if (firstError) {
     res.status(500).json({ error: firstError.message });
     return;
@@ -53,6 +58,7 @@ export default async function handler(req, res) {
   const pending = uploadedRes.count ?? 0;
   const scanned = scannedRes.count ?? 0;
   const surplus = surplusRes.count ?? 0;
+  const cancelled = cancelledRes.count ?? 0;
 
   res.setHeader('Cache-Control', 'public, max-age=5');
   res.json({
@@ -60,8 +66,10 @@ export default async function handler(req, res) {
     scanned,
     missing: pending,
     surplus,
+    cancelled,
     total_scanned: scanned + surplus,
     missing_awbs: (missingAwbsRes.data || []).map((r) => r.awb),
     surplus_awbs: (surplusAwbsRes.data || []).map((r) => r.awb),
+    cancelled_awbs: (cancelledAwbsRes.data || []).map((r) => r.awb),
   });
 }

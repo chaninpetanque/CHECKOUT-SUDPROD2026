@@ -115,6 +115,12 @@ export const deleteRecord = (id) =>
     { message: 'ลบรายการเรียบร้อยแล้ว (mock)' }
   );
 
+export const cancelAwb = (awb) =>
+  handleRequest(
+    () => api.post('/cancel', { awb }),
+    { status: 'cancelled', message: '✅ ยกเลิกสำเร็จ (mock)', awb }
+  );
+
 export const exportReport = async (type, format, date) => {
   try {
     const response = await api.get(`/export?type=${type}&format=${format}&date=${date}`, {

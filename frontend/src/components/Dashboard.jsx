@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Package, CircleCheck, TriangleAlert, CircleX, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon, Volume2, VolumeX } from 'lucide-react';
+import { Package, CircleCheck, TriangleAlert, CircleX, QrCode, ExternalLink, Download, FileText, Calendar as CalendarIcon, Volume2, VolumeX, Ban } from 'lucide-react';
 import { QRCode } from 'react-qr-code';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
@@ -27,7 +27,8 @@ import {
   clearData,
   scanAwb,
   exportReport,
-  deleteRecord
+  deleteRecord,
+  cancelAwb
 } from '../lib/api';
 import { playSound, initAudio } from '../lib/sound';
 
@@ -46,6 +47,7 @@ const Dashboard = () => {
   const [showClearModal, setShowClearModal] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [cancelInput, setCancelInput] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -103,6 +105,25 @@ const Dashboard = () => {
     },
     onError: () => {
       toast.error('ลบรายการล้มเหลว');
+    }
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: (awb) => cancelAwb(awb),
+    onSuccess: (data) => {
+      if (data.status === 'cancelled') {
+        toast.success(data.message);
+      } else if (data.status === 'already_cancelled') {
+        toast.warning(data.message);
+      } else {
+        toast.error(data.message || 'ไม่พบเลขพัสดุ');
+      }
+      setCancelInput('');
+      queryClient.invalidateQueries(['dashboard']);
+      queryClient.invalidateQueries(['history']);
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.error || 'ยกเลิกล้มเหลว');
     }
   });
 
@@ -432,6 +453,41 @@ const Dashboard = () => {
                   <div className={cn("w-4 h-4 bg-white rounded-full shadow-sm transition-transform", autoExportEnabled ? "translate-x-4" : "")} />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Cancel AWB */}
+          <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-800">
+                <Ban className="h-5 w-5" /> ยกเลิกพัสดุ
+              </CardTitle>
+              <CardDescription className="text-red-700/80">
+                กรอกเลขพัสดุที่ต้องการยกเลิก
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={(e) => { e.preventDefault(); if (cancelInput.trim()) cancelMutation.mutate(cancelInput.trim()); }} className="space-y-3">
+                <input
+                  type="text"
+                  value={cancelInput}
+                  onChange={(e) => setCancelInput(e.target.value)}
+                  placeholder="เลขพัสดุ..."
+                  className="w-full px-3 py-2 border border-red-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                />
+                <Button
+                  type="submit"
+                  className="w-full bg-red-500 hover:bg-red-600 text-white"
+                  disabled={!cancelInput.trim() || cancelMutation.isPending}
+                >
+                  {cancelMutation.isPending ? 'กำลังยกเลิก...' : 'ยกเลิกพัสดุ'}
+                </Button>
+              </form>
+              {stats?.cancelled > 0 && (
+                <div className="mt-3 text-sm text-red-700">
+                  ยกเลิกแล้ว: <span className="font-bold">{stats.cancelled}</span> รายการ
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
