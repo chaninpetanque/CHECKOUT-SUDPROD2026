@@ -10,6 +10,19 @@ import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
 import { scanAwb, fetchDashboardStats } from '../lib/api';
 
+/**
+ * Thai keyboard → English character map (same as ScanSection)
+ */
+const THAI_TO_EN_MAP = {
+  'ๆ': 'q', 'ไ': 'w', 'ำ': 'e', 'พ': 'r', 'ะ': 't', 'ั': 'y', 'ี': 'u', 'ร': 'i', 'น': 'o', 'ย': 'p',
+  'ฃ': '[', 'ฅ': ']', '\\': '\\', 'ฟ': 'a', 'ห': 's', 'ก': 'd', 'ด': 'f', 'เ': 'g', '้': 'h',
+  '่': 'j', 'า': 'k', 'ส': 'l', 'ว': ';', "'": '\'', 'ผ': 'z', 'ป': 'x', 'แ': 'c', 'อ': 'v',
+  'ิ': 'b', 'ื': 'n', 'ท': 'm', 'ม': ',', 'ใ': '.', 'ฝ': '/',
+};
+
+const transliterateThai = (str) =>
+  str.split('').map((ch) => THAI_TO_EN_MAP[ch] ?? ch).join('');
+
 const Scanner = () => {
   const [scanResult, setScanResult] = useState(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -111,10 +124,19 @@ const Scanner = () => {
 
   const handleManualSubmit = (e) => {
     e.preventDefault();
-    if (manualInput.trim()) {
-      scanMutation.mutate(manualInput.trim());
+    const raw = manualInput.trim();
+    if (raw) {
+      const hasThai = /[\u0E00-\u0E7F]/.test(raw);
+      const value = hasThai ? transliterateThai(raw) : raw;
+      scanMutation.mutate(value);
       setManualInput('');
     }
+  };
+
+  const handleManualChange = (e) => {
+    const raw = e.target.value;
+    const hasThai = /[\u0E00-\u0E7F]/.test(raw);
+    setManualInput(hasThai ? transliterateThai(raw) : raw);
   };
 
   useEffect(() => {
@@ -243,7 +265,7 @@ const Scanner = () => {
                 <form onSubmit={handleManualSubmit} className="space-y-4">
                   <Input
                     value={manualInput}
-                    onChange={(e) => setManualInput(e.target.value)}
+                    onChange={handleManualChange}
                     placeholder="สแกนหรือพิมพ์เลขพัสดุ..."
                     className="text-center text-lg h-12"
                     autoFocus
