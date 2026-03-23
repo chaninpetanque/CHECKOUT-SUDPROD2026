@@ -26,7 +26,6 @@ import {
   uploadFile,
   clearData,
   scanAwb,
-  exportReport,
   deleteRecord,
   cancelAwb
 } from '../lib/api';
@@ -178,18 +177,16 @@ const Dashboard = () => {
   const downloadReportFn = useCallback(async (type, format, isAuto = false) => {
     try {
       setExporting(true);
-      const res = await exportReport(type, format, selectedDate);
-
-      const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/octet-stream' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      // Use direct URL to get proper Content-Disposition filename
       const ext = format === 'excel' ? 'xlsx' : format;
-      a.href = url;
-      a.download = `report-${type}-${selectedDate}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const url = `/api/export?type=${type}&format=${ext}&date=${selectedDate}`;
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `report-${type}-${selectedDate}.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
       if (isAuto) {
         toast.info('ส่งออกรายงานอัตโนมัติเรียบร้อยแล้ว');
@@ -201,7 +198,6 @@ const Dashboard = () => {
         });
       }
     } catch (error) {
-      // toast handled in api.js for demo mode, or here for generic error
       console.error(error);
     } finally {
       setExporting(false);
