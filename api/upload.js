@@ -82,7 +82,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const awbList = rows.map(extractAwb).filter(Boolean);
+    const awbList = rows.map(extractAwb).filter(awb => awb && awb.startsWith('864'));
     if (!awbList.length) {
       res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: 0, errors: rows.length });
       return;

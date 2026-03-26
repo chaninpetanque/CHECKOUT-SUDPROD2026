@@ -29,6 +29,11 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (!awb.startsWith('864')) {
+    res.json({ status: 'surplus', message: '❌ ผิดรูปแบบ (ต้องขึ้นต้น 864)', awb });
+    return;
+  }
+
   // --- Mock Service Fallback ---
   // If Supabase is not configured (no ENV vars), use in-memory mock service.
   if (!isSupabaseReady) {
@@ -70,6 +75,10 @@ export default async function handler(req, res) {
     }
     if (row.status === 'surplus') {
       res.json({ status: 'duplicate', message: '⚠️ สแกนซ้ำ (เกินจำนวน)', awb });
+      return;
+    }
+    if (row.status === 'cancelled') {
+      res.json({ status: 'cancelled', message: '⚠️ รายการนี้ถูกยกเลิกแล้ว', awb });
       return;
     }
     res.json({ status: 'unknown', message: 'สถานะไม่ทราบค่า', awb });

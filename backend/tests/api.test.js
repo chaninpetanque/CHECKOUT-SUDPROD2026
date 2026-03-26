@@ -12,9 +12,9 @@ import { supabase } from '../../lib/supabase.js';
 
 test('upload, scan, and export flow (Mock Mode)', async () => {
   const uniqueId = Date.now();
-  const awb1 = `A${uniqueId}-1`;
-  const awb2 = `A${uniqueId}-2`;
-  const awbSurplus = `B${uniqueId}-SURPLUS`;
+  const awb1 = `864A${uniqueId}-1`;
+  const awb2 = `864A${uniqueId}-2`;
+  const awbSurplus = `864B${uniqueId}-SURPLUS`;
 
   const csvPath = path.join(os.tmpdir(), `awb-${uniqueId}.csv`);
   fs.writeFileSync(csvPath, `AWB\n${awb1}\n${awb2}\n`);

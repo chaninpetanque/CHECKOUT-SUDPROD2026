@@ -209,9 +209,28 @@ const Dashboard = () => {
   };
 
   const handleScanSubmit = () => {
-    if (!scannerInput.trim()) return;
-    scanMutation.mutate(scannerInput.trim());
+    const value = scannerInput.trim();
+    if (!value) return;
+    if (!value.startsWith('864')) {
+      toast.error('เลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
+      if (audioEnabled) playSound('surplus');
+      setScannerInput('');
+      return;
+    }
+    scanMutation.mutate(value);
     setScannerInput('');
+  };
+
+  const handleCancelSubmit = (e) => {
+    e.preventDefault();
+    const value = cancelInput.trim();
+    if (!value) return;
+    if (!value.startsWith('864')) {
+      toast.error('รูปแบบเลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
+      setCancelInput('');
+      return;
+    }
+    cancelMutation.mutate(value);
   };
 
   const getScanUrl = () => {
@@ -463,7 +482,7 @@ const Dashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={(e) => { e.preventDefault(); if (cancelInput.trim()) cancelMutation.mutate(cancelInput.trim()); }} className="space-y-3">
+              <form onSubmit={handleCancelSubmit} className="space-y-3">
                 <input
                   type="text"
                   value={cancelInput}

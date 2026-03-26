@@ -27,6 +27,11 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (!awb.startsWith('864')) {
+    res.status(400).json({ error: 'รูปแบบเลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)' });
+    return;
+  }
+
   // --- Mock Service Fallback ---
   if (!isSupabaseReady) {
     const result = mockService.cancel(awb, today);

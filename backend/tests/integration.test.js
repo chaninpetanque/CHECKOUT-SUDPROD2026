@@ -10,9 +10,9 @@ import { supabase } from '../../lib/supabase.js';
 test('Full Integration Flow (Upload -> Scan -> Verify -> Cleanup)', async (t) => {
   const today = new Date().toISOString().split('T')[0];
   const testId = `INT-${Date.now()}`;
-  const awb1 = `${testId}-1`;
-  const awb2 = `${testId}-2`;
-  const awbSurplus = `${testId}-SURPLUS`;
+  const awb1 = `864${testId}-1`;
+  const awb2 = `864${testId}-2`;
+  const awbSurplus = `864${testId}-SURPLUS`;
 
   // 1. Prepare CSV File
   const csvPath = path.join(os.tmpdir(), `${testId}.csv`);

@@ -128,6 +128,13 @@ const Scanner = () => {
     if (raw) {
       const hasThai = /[\u0E00-\u0E7F]/.test(raw);
       const value = hasThai ? transliterateThai(raw) : raw;
+      
+      if (!value.startsWith('864')) {
+        toast.error('เลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
+        setManualInput('');
+        return;
+      }
+      
       scanMutation.mutate(value);
       setManualInput('');
     }
@@ -158,6 +165,14 @@ const Scanner = () => {
     const onScanSuccess = (decodedText) => {
       if (decodedText === lastScannedRef.current) return;
       lastScannedRef.current = decodedText;
+      
+      if (!decodedText.startsWith('864')) {
+        toast.error('เลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
+        playSound('surplus');
+        setTimeout(() => { lastScannedRef.current = null; }, 2000);
+        return;
+      }
+      
       scanMutation.mutate(decodedText);
     };
 
@@ -208,7 +223,7 @@ const Scanner = () => {
         setScannerReady(false);
       }
     };
-  }, [manualMode, scanMutation]);
+  }, [manualMode, scanMutation, playSound]);
 
   // Determine background color based on status
   const getStatusColor = () => {

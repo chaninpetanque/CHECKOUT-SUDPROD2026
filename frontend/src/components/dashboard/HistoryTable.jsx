@@ -24,6 +24,7 @@ const HistoryTable = ({
     { key: 'match', label: 'ปกติ' },
     { key: 'duplicate', label: 'ซ้ำ' },
     { key: 'surplus', label: 'เกิน' },
+    { key: 'cancelled', label: 'ยกเลิก' },
   ];
 
   return (
