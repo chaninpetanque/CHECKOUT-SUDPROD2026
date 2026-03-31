@@ -74,7 +74,9 @@ export default async function handler(req, res) {
     if (ext === '.xlsx' || ext === '.xls') {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0];
-      rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { range: 'C1:C10000' });
+      const rawRows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+      // Column C = index 2, skip row 1 (header), start from row 2 (index 1)
+      rows = rawRows.slice(1).map(r => ({ AWB: r[2] })).filter(r => r.AWB);
     } else if (ext === '.csv') {
       rows = await parseCsv(filePath);
     } else {
