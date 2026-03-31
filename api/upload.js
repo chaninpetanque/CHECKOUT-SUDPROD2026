@@ -74,7 +74,7 @@ export default async function handler(req, res) {
     if (ext === '.xlsx' || ext === '.xls') {
       const workbook = xlsx.readFile(filePath);
       const sheetName = workbook.SheetNames[0];
-      rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { range: 'C1:Z10000' });
+      rows = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { range: 'C2:Z10000' });
     } else if (ext === '.csv') {
       rows = await parseCsv(filePath);
     } else {
