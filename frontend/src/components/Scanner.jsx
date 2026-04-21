@@ -9,6 +9,7 @@ import { Input } from './ui/input';
 import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
 import { scanAwb, fetchDashboardStats } from '../lib/api';
+import { validateAwb, VALID_PREFIXES } from '../lib/awb-validation';
 
 /**
  * Thai keyboard → English character map (same as ScanSection)
@@ -128,13 +129,21 @@ const Scanner = () => {
     if (raw) {
       const hasThai = /[\u0E00-\u0E7F]/.test(raw);
       const value = hasThai ? transliterateThai(raw) : raw;
-      
-      if (!value.startsWith('864')) {
-        toast.error('เลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
-        setManualInput('');
+
+      // Validate AWB format before sending
+      const validation = validateAwb(value);
+      if (!validation.valid) {
+        toast.error(validation.error);
+        setScanResult({
+          status: 'invalid',
+          message: validation.error,
+          awb: value,
+          timestamp: new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })
+        });
+        playSound('surplus');
         return;
       }
-      
+
       scanMutation.mutate(value);
       setManualInput('');
     }
@@ -145,6 +154,12 @@ const Scanner = () => {
     const hasThai = /[\u0E00-\u0E7F]/.test(raw);
     setManualInput(hasThai ? transliterateThai(raw) : raw);
   };
+
+  // Use refs to avoid re-initializing scanner when mutation/playSound change
+  const scanMutationRef = useRef(scanMutation);
+  useEffect(() => {
+    scanMutationRef.current = scanMutation;
+  });
 
   useEffect(() => {
     // Clean up previous scanner instance if switching modes
@@ -165,15 +180,21 @@ const Scanner = () => {
     const onScanSuccess = (decodedText) => {
       if (decodedText === lastScannedRef.current) return;
       lastScannedRef.current = decodedText;
-      
-      if (!decodedText.startsWith('864')) {
-        toast.error('เลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
-        playSound('surplus');
-        setTimeout(() => { lastScannedRef.current = null; }, 2000);
+
+      // Validate AWB format before sending
+      const validation = validateAwb(decodedText);
+      if (!validation.valid) {
+        toast.error(validation.error);
+        setScanResult({
+          status: 'invalid',
+          message: validation.error,
+          awb: decodedText,
+          timestamp: new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })
+        });
         return;
       }
-      
-      scanMutation.mutate(decodedText);
+
+      scanMutationRef.current.mutate(decodedText);
     };
 
     // Small delay to ensure DOM is ready
@@ -223,7 +244,7 @@ const Scanner = () => {
         setScannerReady(false);
       }
     };
-  }, [manualMode, scanMutation, playSound]);
+  }, [manualMode]);
 
   // Determine background color based on status
   const getStatusColor = () => {
@@ -232,6 +253,7 @@ const Scanner = () => {
       case 'match': return 'bg-green-600';
       case 'duplicate': return 'bg-yellow-500';
       case 'surplus': return 'bg-red-600';
+      case 'invalid': return 'bg-orange-600';
       default: return 'bg-gray-900';
     }
   };
@@ -329,7 +351,8 @@ const Scanner = () => {
                   "w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4",
                   scanResult.status === 'match' ? "bg-green-100 text-green-600" :
                     scanResult.status === 'duplicate' ? "bg-yellow-100 text-yellow-600" :
-                      "bg-red-100 text-red-600"
+                      scanResult.status === 'invalid' ? "bg-orange-100 text-orange-600" :
+                        "bg-red-100 text-red-600"
                 )}>
                   {scanResult.status === 'match' ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -338,6 +361,10 @@ const Scanner = () => {
                   ) : scanResult.status === 'duplicate' ? (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  ) : scanResult.status === 'invalid' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                     </svg>
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -350,7 +377,8 @@ const Scanner = () => {
                   "text-lg font-medium",
                   scanResult.status === 'match' ? "text-green-600" :
                     scanResult.status === 'duplicate' ? "text-yellow-600" :
-                      "text-red-600"
+                      scanResult.status === 'invalid' ? "text-orange-600" :
+                        "text-red-600"
                 )}>
                   {scanResult.message}
                 </p>

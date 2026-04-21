@@ -130,7 +130,8 @@ const ScanSection = ({
               scanStatus.status === 'match' ? 'bg-green-50 border-green-200 text-green-800' :
                 scanStatus.status === 'duplicate' ? 'bg-yellow-50 border-yellow-200 text-yellow-800' :
                   scanStatus.status === 'surplus' ? 'bg-red-50 border-red-200 text-red-800' :
-                    'bg-blue-50 border-blue-200 text-blue-800'
+                    scanStatus.status === 'invalid' ? 'bg-orange-50 border-orange-200 text-orange-800' :
+                      'bg-blue-50 border-blue-200 text-blue-800'
             )}
           >
             <div>
@@ -138,6 +139,7 @@ const ScanSection = ({
                 {scanStatus.status === 'match' && '✅ จับคู่สำเร็จ'}
                 {scanStatus.status === 'duplicate' && '⚠️ ซ้ำ'}
                 {scanStatus.status === 'surplus' && '❌ เกินจำนวน (ไม่พบข้อมูล)'}
+                {scanStatus.status === 'invalid' && '🚫 เลขพัสดุไม่ถูกต้อง'}
                 {scanStatus.status === 'export' && '⬇️ ส่งออกแล้ว'}
               </div>
               <div className="text-sm mt-1">{scanStatus.message}</div>

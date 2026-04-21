@@ -30,6 +30,7 @@ import {
   cancelAwb
 } from '../lib/api';
 import { playSound, initAudio } from '../lib/sound';
+import { validateAwb } from '../lib/awb-validation';
 
 const Dashboard = () => {
   const [file, setFile] = useState(null);
@@ -211,12 +212,22 @@ const Dashboard = () => {
   const handleScanSubmit = () => {
     const value = scannerInput.trim();
     if (!value) return;
-    if (!value.startsWith('864')) {
-      toast.error('เลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
+
+    // Validate AWB format before sending
+    const validation = validateAwb(value);
+    if (!validation.valid) {
+      toast.error(validation.error);
+      setScanStatus({
+        status: 'invalid',
+        message: validation.error,
+        awb: value,
+        time: new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })
+      });
       if (audioEnabled) playSound('surplus');
       setScannerInput('');
       return;
     }
+
     scanMutation.mutate(value);
     setScannerInput('');
   };
@@ -225,11 +236,6 @@ const Dashboard = () => {
     e.preventDefault();
     const value = cancelInput.trim();
     if (!value) return;
-    if (!value.startsWith('864')) {
-      toast.error('รูปแบบเลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)');
-      setCancelInput('');
-      return;
-    }
     cancelMutation.mutate(value);
   };
 

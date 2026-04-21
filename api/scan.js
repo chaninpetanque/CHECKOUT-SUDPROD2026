@@ -1,6 +1,7 @@
 import { supabase, isSupabaseReady } from '../lib/supabase.js';
 import { mockService } from '../lib/mock-service.js';
 import { getTodayDateTH, getNowTH } from '../lib/timezone.js';
+import { validateAwb } from '../lib/awb-validation.js';
 
 const getTodayDate = getTodayDateTH;
 
@@ -20,7 +21,13 @@ export default async function handler(req, res) {
     return;
   }
 
-  const body = await parseBody(req);
+  let body;
+  try {
+    body = await parseBody(req);
+  } catch {
+    res.status(400).json({ error: 'Invalid request body' });
+    return;
+  }
   const awb = String(body.awb ?? '').trim();
   const today = getTodayDate();
 
@@ -29,8 +36,10 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!awb.startsWith('864')) {
-    res.json({ status: 'surplus', message: '❌ ผิดรูปแบบ (ต้องขึ้นต้น 864)', awb });
+  // Validate AWB format (prefix + minimum length)
+  const validation = validateAwb(awb);
+  if (!validation.valid) {
+    res.status(400).json({ status: 'invalid', error: validation.error, awb });
     return;
   }
 
