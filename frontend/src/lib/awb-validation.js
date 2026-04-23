@@ -4,6 +4,7 @@
  * 
  * Supported prefixes:
  *  - 864  (Flash Express)
+ *  - 795  (TikTok / J&T Express)
  *  - TH   (Thailand Post / Kerry Express)
  *  - SDOF (จ.ส่งด่วน)
  *  - SM   (Shopee Express)
@@ -19,6 +20,7 @@
 // Valid AWB prefixes — case-insensitive matching
 export const VALID_PREFIXES = [
   '864',
+  '795',
   'TH',
   'SDOF',
   'SM',

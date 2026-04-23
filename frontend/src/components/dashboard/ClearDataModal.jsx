@@ -10,36 +10,36 @@ const MODES = [
         label: 'ล้างข้อมูลเก่า',
         description: 'ลบเฉพาะรายการที่อัปโหลดแล้ว และไม่ใช่วันนี้',
         icon: Trash2,
-        color: 'blue',
         cardClass: 'border-blue-200 bg-blue-50 hover:border-blue-400',
         iconClass: 'text-blue-600',
         selectedClass: 'border-blue-500 bg-blue-100 ring-2 ring-blue-400',
         badge: 'ปลอดภัย',
         badgeClass: 'bg-blue-100 text-blue-700',
+        radioSelected: 'border-blue-500 bg-blue-500',
     },
     {
         id: 'today',
         label: 'ล้างข้อมูลวันนี้',
         description: 'ลบทุกรายการของวันนี้ทั้งหมด',
         icon: CalendarX,
-        color: 'orange',
         cardClass: 'border-orange-200 bg-orange-50 hover:border-orange-400',
         iconClass: 'text-orange-500',
         selectedClass: 'border-orange-500 bg-orange-100 ring-2 ring-orange-400',
         badge: 'ระวัง',
         badgeClass: 'bg-orange-100 text-orange-700',
+        radioSelected: 'border-orange-500 bg-orange-500',
     },
     {
         id: 'all',
         label: 'ล้างข้อมูลทั้งหมด',
         description: 'ลบทุกรายการทุกวัน — ไม่สามารถกู้คืนได้',
         icon: ShieldAlert,
-        color: 'red',
         cardClass: 'border-red-200 bg-red-50 hover:border-red-400',
         iconClass: 'text-red-600',
         selectedClass: 'border-red-500 bg-red-100 ring-2 ring-red-500',
         badge: '⚠️ อันตราย',
         badgeClass: 'bg-red-100 text-red-700',
+        radioSelected: 'border-red-500 bg-red-500',
     },
 ];
 
@@ -126,7 +126,7 @@ const ClearDataModal = ({ open, onOpenChange, onConfirm, isLoading }) => {
                                 <div className={cn(
                                     'w-4 h-4 rounded-full border-2 shrink-0 mt-0.5 transition-colors',
                                     isSelected
-                                        ? `border-${mode.color}-500 bg-${mode.color}-500`
+                                        ? mode.radioSelected
                                         : 'border-gray-300'
                                 )}>
                                     {isSelected && <div className="w-full h-full rounded-full bg-white scale-[0.4]" />}

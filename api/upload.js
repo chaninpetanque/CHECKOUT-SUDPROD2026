@@ -84,7 +84,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const awbList = rows.map(extractAwb).filter(awb => awb && awb.startsWith('864'));
+    const awbList = rows.map(extractAwb).filter(Boolean);
     if (!awbList.length) {
       res.json({ message: 'ประมวลผลไฟล์แล้ว', inserted: 0, errors: rows.length });
       return;
@@ -144,6 +144,11 @@ export default async function handler(req, res) {
     const errors = awbList.length - uniqueAwbs.length;
     const inserted = Math.max(uniqueAwbs.length - existingCount, 0);
     res.json({ message: 'ประมวลผลไฟล์เรียบร้อยแล้ว', inserted, errors });
+  } catch (err) {
+    console.error('Upload processing error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err.message || 'เกิดข้อผิดพลาดในการประมวลผลไฟล์' });
+    }
   } finally {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);

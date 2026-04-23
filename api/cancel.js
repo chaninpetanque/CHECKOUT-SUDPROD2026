@@ -18,17 +18,18 @@ export default async function handler(req, res) {
     return;
   }
 
-  const body = await parseBody(req);
+  let body;
+  try {
+    body = await parseBody(req);
+  } catch {
+    res.status(400).json({ error: 'Invalid request body' });
+    return;
+  }
   const awb = String(body.awb ?? '').trim();
   const today = getTodayDateTH();
 
   if (!awb) {
     res.status(400).json({ error: 'กรุณาระบุเลขพัสดุ' });
-    return;
-  }
-
-  if (!awb.startsWith('864')) {
-    res.status(400).json({ error: 'รูปแบบเลขพัสดุไม่ถูกต้อง (ต้องขึ้นต้นด้วย 864)' });
     return;
   }
 

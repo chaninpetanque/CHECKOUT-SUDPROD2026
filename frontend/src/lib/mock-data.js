@@ -9,14 +9,14 @@ export const mockStats = {
 };
 
 export const mockHistory = [
-  { id: 1, awb: 'TH123456789', status: 'match', scanned_at: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
-  { id: 2, awb: 'TH987654321', status: 'match', scanned_at: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
-  { id: 3, awb: 'TH555555555', status: 'duplicate', scanned_at: new Date(Date.now() - 1000 * 60 * 15).toISOString() },
-  { id: 4, awb: 'UNKNOWN123', status: 'surplus', scanned_at: new Date(Date.now() - 1000 * 60 * 20).toISOString() },
+  { id: 1, awb: 'TH123456789', status: 'match', updated_at: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
+  { id: 2, awb: 'TH987654321', status: 'match', updated_at: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
+  { id: 3, awb: 'TH555555555', status: 'duplicate', updated_at: new Date(Date.now() - 1000 * 60 * 15).toISOString() },
+  { id: 4, awb: 'UNKNOWN123', status: 'surplus', updated_at: new Date(Date.now() - 1000 * 60 * 20).toISOString() },
 ];
 
 export const mockIpData = {
-  origin: 'http://localhost:3000'
+  ip: 'localhost'
 };
 
 export const mockUploadResponse = {

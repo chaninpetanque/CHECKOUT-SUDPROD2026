@@ -12,8 +12,6 @@ const HistoryTable = ({
   setSearchTerm,
   handleExport,
   isExporting,
-  selectedDate,
-  setSelectedDate,
   onDelete,
   isDeleting,
   statusFilter,
@@ -117,13 +115,15 @@ const HistoryTable = ({
                           variant={
                             item.status === 'match' || item.status === 'scanned' ? 'success' :
                               item.status === 'duplicate' ? 'warning' :
-                                'destructive'
+                                item.status === 'cancelled' ? 'secondary' :
+                                  'destructive'
                           }
                           className="capitalize"
                         >
                           {item.status === 'match' || item.status === 'scanned' ? 'ปกติ' :
                             item.status === 'duplicate' ? 'ซ้ำ' :
-                              'เกิน'}
+                              item.status === 'cancelled' ? 'ยกเลิก' :
+                                'เกิน'}
                         </Badge>
                       </td>
                       <td className="p-4 align-middle text-right">

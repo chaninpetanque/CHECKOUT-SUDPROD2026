@@ -20,7 +20,13 @@ export default async function handler(req, res) {
     return;
   }
 
-  const body = await parseBody(req);
+  let body;
+  try {
+    body = await parseBody(req);
+  } catch {
+    res.status(400).json({ error: 'Invalid request body' });
+    return;
+  }
   const mode = String(body.mode ?? 'old').toLowerCase();
   const today = getTodayDate();
 
