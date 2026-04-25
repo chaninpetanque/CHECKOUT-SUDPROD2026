@@ -88,6 +88,13 @@ const themes = {
         badge: 'border-red-200 text-red-600 bg-red-100',
         item: 'bg-white/70 hover:bg-red-100/50',
     },
+    tiktokSurplus: {
+        border: 'border-fuchsia-200',
+        bg: 'bg-fuchsia-50/50',
+        text: 'text-fuchsia-700',
+        badge: 'border-fuchsia-200 text-fuchsia-600 bg-fuchsia-100',
+        item: 'bg-white/70 hover:bg-fuchsia-100/50',
+    },
     missing: {
         border: 'border-amber-200',
         bg: 'bg-amber-50/50',
@@ -97,16 +104,22 @@ const themes = {
     },
 };
 
-const AwbListSection = ({ surplusAwbs = [], missingAwbs = [] }) => {
-    if (surplusAwbs.length === 0 && missingAwbs.length === 0) return null;
+const AwbListSection = ({ surplusAwbs = [], tiktokSurplusAwbs = [], missingAwbs = [] }) => {
+    if (surplusAwbs.length === 0 && tiktokSurplusAwbs.length === 0 && missingAwbs.length === 0) return null;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AwbList
-                title="เลขที่เกินมา"
+                title="เกินมา (Facebook)"
                 awbs={surplusAwbs}
                 icon={TriangleAlert}
                 theme={themes.surplus}
+            />
+            <AwbList
+                title="เกินมา (TikTok)"
+                awbs={tiktokSurplusAwbs}
+                icon={TriangleAlert}
+                theme={themes.tiktokSurplus}
             />
             <AwbList
                 title="เลขที่ตกหล่น"

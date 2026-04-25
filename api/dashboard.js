@@ -73,6 +73,8 @@ export default async function handler(req, res) {
   const fbScanned = scanned - tiktokScanned;
   const fbSurplus = surplus - tiktokSurplus;
 
+  const allSurplusAwbs = (surplusAwbsRes.data || []).map((r) => r.awb);
+
   res.setHeader('Cache-Control', 'public, max-age=5');
   res.json({
     total_expected: pending + scanned,
@@ -83,7 +85,8 @@ export default async function handler(req, res) {
     total_scanned: fbScanned + fbSurplus,
     tiktok_scanned: tiktokScanned + tiktokSurplus,
     missing_awbs: (missingAwbsRes.data || []).map((r) => r.awb),
-    surplus_awbs: (surplusAwbsRes.data || []).map((r) => r.awb),
+    surplus_awbs: allSurplusAwbs.filter((awb) => !awb.startsWith('795')),
+    tiktok_surplus_awbs: allSurplusAwbs.filter((awb) => awb.startsWith('795')),
     cancelled_awbs: (cancelledAwbsRes.data || []).map((r) => r.awb),
   });
 }
