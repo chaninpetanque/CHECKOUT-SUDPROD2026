@@ -69,14 +69,18 @@ export default async function handler(req, res) {
   const tiktokScanned = tiktokScannedRes.count ?? 0;
   const tiktokSurplus = tiktokSurplusRes.count ?? 0;
 
+  // Facebook = all counts minus TikTok counts
+  const fbScanned = scanned - tiktokScanned;
+  const fbSurplus = surplus - tiktokSurplus;
+
   res.setHeader('Cache-Control', 'public, max-age=5');
   res.json({
     total_expected: pending + scanned,
-    scanned,
+    scanned: fbScanned,
     missing: pending,
-    surplus,
+    surplus: fbSurplus,
     cancelled,
-    total_scanned: scanned + surplus,
+    total_scanned: fbScanned + fbSurplus,
     tiktok_scanned: tiktokScanned + tiktokSurplus,
     missing_awbs: (missingAwbsRes.data || []).map((r) => r.awb),
     surplus_awbs: (surplusAwbsRes.data || []).map((r) => r.awb),

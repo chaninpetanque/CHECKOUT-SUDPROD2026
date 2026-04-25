@@ -110,16 +110,16 @@ const themes = {
 const SummaryTotals = ({ stats }) => {
     if (!stats) return null;
 
-    const totalScanned = stats.total_scanned ?? (stats.scanned + stats.surplus);
+    const fbScanned = stats.scanned ?? 0;       // Facebook matched
+    const fbSurplus = stats.surplus ?? 0;        // Facebook surplus
+    const fbTotal = stats.total_scanned ?? (fbScanned + fbSurplus);
     const totalExpected = stats.total_expected ?? 0;
-    const surplus = stats.surplus ?? 0;
-    const matched = stats.scanned ?? 0;
     const missing = stats.missing ?? 0;
     const tiktokScanned = stats.tiktok_scanned ?? 0;
-    const grandTotal = totalScanned + tiktokScanned;
+    const grandTotal = fbTotal + tiktokScanned;
 
     const matchPercent = totalExpected > 0
-        ? Math.round((matched / totalExpected) * 100)
+        ? Math.round((fbScanned / totalExpected) * 100)
         : 0;
 
     return (
@@ -145,7 +145,7 @@ const SummaryTotals = ({ stats }) => {
                                 </span>
                             </div>
                             <p className="text-xs font-medium text-gray-500 mt-1">
-                                Facebook {totalScanned} + TikTok {tiktokScanned}
+                                Facebook {fbTotal} + TikTok {tiktokScanned}
                             </p>
                         </div>
                         <div className="p-3 rounded-xl bg-white/10">
@@ -160,8 +160,8 @@ const SummaryTotals = ({ stats }) => {
                 <SummaryItem
                     icon={FacebookIcon}
                     label="Facebook"
-                    value={totalScanned}
-                    breakdown={`ตรง ${matched} + เกิน ${surplus}`}
+                    value={fbTotal}
+                    breakdown={`ตรง ${fbScanned} + เกิน ${fbSurplus}`}
                     {...themes.facebook}
                 />
                 <SummaryItem
@@ -184,14 +184,14 @@ const SummaryTotals = ({ stats }) => {
                 />
                 <SummaryItem
                     icon={AlertTriangle}
-                    label="ยอดเกิน"
-                    value={surplus}
+                    label="ยอดเกิน (Facebook)"
+                    value={fbSurplus}
                     {...themes.surplus}
                 />
                 <SummaryItem
                     icon={CheckCircle2}
                     label="ตรงกับไฟล์ขนส่ง"
-                    value={matched}
+                    value={fbScanned}
                     percentage={matchPercent}
                     {...themes.matched}
                 />
