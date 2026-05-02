@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   }
 
   // --- Supabase Logic (parallel aggregate queries + AWB lists) ---
-  const [uploadedRes, scannedRes, surplusRes, cancelledRes, missingAwbsRes, surplusAwbsRes, cancelledAwbsRes, tiktokScannedRes, tiktokSurplusRes] = await Promise.all([
+  const [uploadedRes, scannedRes, surplusRes, cancelledRes, missingAwbsRes, surplusAwbsRes, cancelledAwbsRes, tiktokScannedRes, tiktokSurplusRes, tiktokScannedAwbsRes] = await Promise.all([
     supabase.from('parcels').select('*', { count: 'exact', head: true })
       .eq('date', date).eq('status', 'uploaded'),
     supabase.from('parcels').select('*', { count: 'exact', head: true })
@@ -46,17 +46,21 @@ export default async function handler(req, res) {
     supabase.from('parcels').select('awb')
       .eq('date', date).eq('status', 'cancelled')
       .order('created_at', { ascending: false }).limit(200),
-    // TikTok parcels (AWB starting with 795) — scanned
+    // TikTok parcels (AWB starting with 7) — scanned
     supabase.from('parcels').select('*', { count: 'exact', head: true })
-      .eq('date', date).eq('status', 'scanned').like('awb', '795%'),
-    // TikTok parcels (AWB starting with 795) — surplus
+      .eq('date', date).eq('status', 'scanned').like('awb', '7%'),
+    // TikTok parcels (AWB starting with 7) — surplus
     supabase.from('parcels').select('*', { count: 'exact', head: true })
-      .eq('date', date).eq('status', 'surplus').like('awb', '795%'),
+      .eq('date', date).eq('status', 'surplus').like('awb', '7%'),
+    // TikTok scanned AWB list
+    supabase.from('parcels').select('awb')
+      .eq('date', date).eq('status', 'scanned').like('awb', '7%')
+      .order('created_at', { ascending: false }).limit(200),
   ]);
 
   const firstError = uploadedRes.error || scannedRes.error || surplusRes.error
     || cancelledRes.error || missingAwbsRes.error || surplusAwbsRes.error || cancelledAwbsRes.error
-    || tiktokScannedRes.error || tiktokSurplusRes.error;
+    || tiktokScannedRes.error || tiktokSurplusRes.error || tiktokScannedAwbsRes.error;
   if (firstError) {
     res.status(500).json({ error: firstError.message });
     return;
@@ -77,16 +81,17 @@ export default async function handler(req, res) {
 
   res.setHeader('Cache-Control', 'public, max-age=5');
   res.json({
-    total_expected: pending + scanned,
+    total_expected: pending + fbScanned,
     scanned: fbScanned,
     missing: pending,
     surplus: fbSurplus,
     cancelled,
     total_scanned: fbScanned + fbSurplus,
-    tiktok_scanned: tiktokScanned + tiktokSurplus,
+    tiktok_scanned: tiktokScanned,
     missing_awbs: (missingAwbsRes.data || []).map((r) => r.awb),
-    surplus_awbs: allSurplusAwbs.filter((awb) => !awb.startsWith('795')),
-    tiktok_surplus_awbs: allSurplusAwbs.filter((awb) => awb.startsWith('795')),
+    surplus_awbs: allSurplusAwbs.filter((awb) => !awb.startsWith('7')),
+    tiktok_surplus_awbs: allSurplusAwbs.filter((awb) => awb.startsWith('7')),
+    tiktok_scanned_awbs: (tiktokScannedAwbsRes.data || []).map((r) => r.awb),
     cancelled_awbs: (cancelledAwbsRes.data || []).map((r) => r.awb),
   });
 }

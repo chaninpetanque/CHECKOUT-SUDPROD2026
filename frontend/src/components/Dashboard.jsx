@@ -324,6 +324,7 @@ const Dashboard = () => {
         <AwbListSection
           surplusAwbs={stats?.surplus_awbs || []}
           tiktokSurplusAwbs={stats?.tiktok_surplus_awbs || []}
+          tiktokScannedAwbs={stats?.tiktok_scanned_awbs || []}
           missingAwbs={stats?.missing_awbs || []}
         />
       )}

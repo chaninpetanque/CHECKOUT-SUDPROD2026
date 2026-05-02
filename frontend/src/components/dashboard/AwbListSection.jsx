@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
-import { ChevronDown, ChevronUp, TriangleAlert, CircleX, Copy, Check } from 'lucide-react';
+import { ChevronDown, ChevronUp, TriangleAlert, CircleX, Copy, Check, Package } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 const AwbList = ({ title, awbs, icon: Icon, theme }) => {
@@ -102,10 +102,17 @@ const themes = {
         badge: 'border-amber-200 text-amber-600 bg-amber-100',
         item: 'bg-white/70 hover:bg-amber-100/50',
     },
+    tiktokScanned: {
+        border: 'border-fuchsia-200',
+        bg: 'bg-fuchsia-50/50',
+        text: 'text-fuchsia-700',
+        badge: 'border-fuchsia-200 text-fuchsia-600 bg-fuchsia-100',
+        item: 'bg-white/70 hover:bg-fuchsia-100/50',
+    },
 };
 
-const AwbListSection = ({ surplusAwbs = [], tiktokSurplusAwbs = [], missingAwbs = [] }) => {
-    if (surplusAwbs.length === 0 && tiktokSurplusAwbs.length === 0 && missingAwbs.length === 0) return null;
+const AwbListSection = ({ surplusAwbs = [], tiktokSurplusAwbs = [], tiktokScannedAwbs = [], missingAwbs = [] }) => {
+    if (surplusAwbs.length === 0 && tiktokSurplusAwbs.length === 0 && tiktokScannedAwbs.length === 0 && missingAwbs.length === 0) return null;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -120,6 +127,12 @@ const AwbListSection = ({ surplusAwbs = [], tiktokSurplusAwbs = [], missingAwbs 
                 awbs={tiktokSurplusAwbs}
                 icon={TriangleAlert}
                 theme={themes.tiktokSurplus}
+            />
+            <AwbList
+                title="เลขพัสดุ TikTok"
+                awbs={tiktokScannedAwbs}
+                icon={Package}
+                theme={themes.tiktokScanned}
             />
             <AwbList
                 title="เลขที่ตกหล่น"

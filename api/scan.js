@@ -94,12 +94,21 @@ export default async function handler(req, res) {
     return;
   }
 
+  // TikTok AWBs (starting with '7') are entered manually — treat as direct scan
+  const isTiktok = awb.startsWith('7');
+  const insertStatus = isTiktok ? 'scanned' : 'surplus';
+
   const { error: insertError } = await supabase
     .from('parcels')
-    .insert([{ awb, status: 'surplus', date: today }]);
+    .insert([{ awb, status: insertStatus, date: today }]);
   if (insertError) {
     res.status(500).json({ error: insertError.message });
     return;
   }
-  res.json({ status: 'surplus', message: '❌ ไม่อยู่ในรายการ (เกินจำนวน)', awb });
+
+  if (isTiktok) {
+    res.json({ status: 'match', message: '✅ บันทึก TikTok สำเร็จ', awb });
+  } else {
+    res.json({ status: 'surplus', message: '❌ ไม่อยู่ในรายการ (เกินจำนวน)', awb });
+  }
 }
